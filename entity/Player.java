@@ -12,6 +12,20 @@ public class Player {
 	private String position;
 	private String number;
 	private String role;  //Role in team, team member or caption
+	public Player(String id,String name,String teamName,String height,String weight,String age,String grade,String depart,String position,String number,String role) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.teamName = teamName;
+		this.height = height;
+		this.weight = weight;
+		this.age = age;
+		this.grade = grade;
+		this.depart = depart;
+		this.position = position;
+		this.number = number;
+		this.role = role;
+	}
 	public String getId() {
 		return id;
 	}
