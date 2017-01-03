@@ -9,6 +9,15 @@ public class Finance {
 	private String time;    //Date到底倒那个包
 	private String year;
 	private String remark;
+	public Finance(String teamName,String type,String amount,String time,String year,String remark) {
+		super();
+		this.teamName = teamName;
+		this.type = type;
+		this.amount = amount;
+		this.time = time;
+		this.year = year;
+		this.remark = remark;
+	}
 	public String getTeamName() {
 		return teamName;
 	}
