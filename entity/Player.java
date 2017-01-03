@@ -3,22 +3,35 @@ package graduate;
 public class Player {
 	private String id;
 	private String name;
+	private String teamName;
 	private String height;
 	private String weight;
 	private String age;
 	private String grade;
-	private String goal;
+	private String depart;
 	private String position;
 	private String number;
 	private String role;  //Role in team, team member or caption
 	public String getId() {
 		return id;
 	}
+	public String getDepart() {
+		return depart;
+	}
+	public void setDepart(String depart) {
+		this.depart = depart;
+	}
 	public void setId(String id) {
 		this.id = id;
 	}
 	public String getName() {
 		return name;
+	}
+	public void setTeamName(String teamName) {
+		this.teamName = teamName;
+	}
+	public String getTeamName() {
+		return teamName;
 	}
 	public void setName(String name) {
 		this.name = name;
@@ -46,12 +59,6 @@ public class Player {
 	}
 	public void setGrade(String grade) {
 		this.grade = grade;
-	}
-	public String getGoal() {
-		return goal;
-	}
-	public void setGoal(String goal) {
-		this.goal = goal;
 	}
 	public String getPosition() {
 		return position;
