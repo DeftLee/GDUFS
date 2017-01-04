@@ -1,0 +1,79 @@
+package graduate;
+
+public class GameResult {
+	private String gameName;
+	private String result;
+	private String teamA;
+	private String teamB;
+	private int goalA;
+	private int goalB;
+	private String remark;
+	private String time;
+	private String type;
+	public GameResult(String gameName,String result,String teamA,String teamB,int goalA,int goalB,String remark,String time,String type) {
+		super();
+		this.gameName = gameName;
+		this.result = result;
+		this.teamA = teamA;
+		this.teamB = teamB;
+		this.goalA = goalA;
+		this.goalB = goalB;
+		this.remark = remark;
+		this.time = time;
+		this.type = type;
+	}
+	public String getGameName() {
+		return gameName;
+	}
+	public void setGameName(String gameName) {
+		this.gameName = gameName;
+	}
+	public String getResult() {
+		return result;
+	}
+	public void setResult(String result) {
+		this.result = result;
+	}
+	public String getTeamA() {
+		return teamA;
+	}
+	public void setTeamA(String teamA) {
+		this.teamA = teamA;
+	}
+	public String getTeamB() {
+		return teamB;
+	}
+	public void setTeamB(String teamB) {
+		this.teamB = teamB;
+	}
+	public int getGoalA() {
+		return goalA;
+	}
+	public void setGoalA(int goalA) {
+		this.goalA = goalA;
+	}
+	public int getGoalB() {
+		return goalB;
+	}
+	public void setGoalB(int goalB) {
+		this.goalB = goalB;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+	public String getTime() {
+		return time;
+	}
+	public void setTime(String time) {
+		this.time = time;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+}
