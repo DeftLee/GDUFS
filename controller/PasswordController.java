@@ -26,14 +26,14 @@ public class PasswordController {
 
 	
 	@RequestMapping(value = "/findPasswordCheck", method = RequestMethod.POST)
-	public void passwordCheck(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+	public void findPasswordCheck(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
 		request.setCharacterEncoding("utf-8");
 	    response.setCharacterEncoding("utf-8");
 	    
 	    PrintWriter out = response.getWriter();
-		String userName = request.getParameter("userName");
-		String email = request.getParameter("email");
+		String userName = request.getParameter("userName").trim();
+		String email = request.getParameter("email").trim();
 		PasswordManageDao user = new PasswordManageDao();
 		String nameCheck = user.checkName(userName);
 		System.out.println(userName+","+email);
@@ -71,8 +71,8 @@ public class PasswordController {
 	    response.setCharacterEncoding("utf-8");
 	    
 	    PrintWriter out = response.getWriter();
-		String userName = request.getParameter("userName");
-		String email = request.getParameter("email");
+		String userName = request.getParameter("userName").trim();
+		String email = request.getParameter("email").trim();
 		PasswordManageDao user = new PasswordManageDao();
 		String nameCheck = user.checkName(userName);
 		System.out.println(userName+","+email);
@@ -108,5 +108,28 @@ public class PasswordController {
 			out.print(html); 
  			out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.location.href='toFindPass';})</script></body>"); 
 		}
+	}
+	
+	@RequestMapping(value = "/changePasswordCheck", method = RequestMethod.POST)
+	public void findPasswordCheck(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+	    response.setCharacterEncoding("utf-8");
+	    
+	    String userName = request.getParameter("userName").trim();
+	    String oldPass = request.getParameter("oldPass").trim();
+	    String newPass = request.getParameter("newPass").trim();
+	    String confirmPass = request.getParameter("confirmPass").trim();
+	    PasswordManageDao user = new PasswordManageDao();
+	    PrintWriter out = response.getWriter();
+	    String checkName = user.checkName(userName);
+	    System.out.println(userName+","+oldPass);
+	    
+	    if(userName.equals("active")) {
+	    	
+	    }
+	    else if() {
+	    	
+	    }
 	}
 }
