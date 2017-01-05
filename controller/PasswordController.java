@@ -20,13 +20,14 @@ public class PasswordController {
 	public void passwordCheck(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
 		request.setCharacterEncoding("utf-8");
-	    response.setCharacterEncoding("utf-8");
+	    	response.setCharacterEncoding("utf-8");
 	    
 	    PrintWriter out = response.getWriter();
 		String userName = request.getParameter("userName");
 		String email = request.getParameter("email");
-		UserRegistrationDao user = new UserRegistrationDao();
-		String nameCheck = user.checkUserName(userName);
+		PasswordManageDao user = new PasswordManageDao();
+		String nameCheck = user.checkName(userName);
+		System.out.println(userName+","+email);
 		
 		if(nameCheck.equals("active")) {
 			out.print("active");
@@ -34,7 +35,7 @@ public class PasswordController {
 		else if(nameCheck.equals("notActive")) {
 			out.print("notActive");
 		}
-		else if(nameCheck.equals("go")) {
+		else if(nameCheck.equals("notExist")) {
 			out.print("notExist");
 		}
 		else {
