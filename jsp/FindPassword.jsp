@@ -103,12 +103,12 @@ function check() {
 				return true;
 			}
 			else {
-				alert("系统错误");
+				alert("系统错误1");
 				return false;
 			}
 		},
 		error:function() {
-			alert("系统错误");
+			alert("系统错误2");
 			return false;
 		}
 	})
