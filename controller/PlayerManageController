@@ -57,6 +57,8 @@ public class PlayerManageController {
 	    else {
 	    	out.print("error");
 	    }
+	    out.flush();
+		out.close();
 	}
 	
 	@RequestMapping(value = "/addPlayerCheckNumber", method = RequestMethod.POST)
@@ -80,6 +82,8 @@ public class PlayerManageController {
 	    else {
 	    	out.print("error");
 	    }
+	    out.flush();
+		out.close();
 	}
 	
 	@RequestMapping(value = "/addPlayerDo", method = RequestMethod.POST)
@@ -125,6 +129,8 @@ public class PlayerManageController {
 	    	out.print(html); 
  			out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
 	    }
+	    out.flush();
+		out.close();
 	}
 	
 	@RequestMapping(value = "/deletePlayerDo", method = RequestMethod.POST)
@@ -146,6 +152,8 @@ public class PlayerManageController {
 	    	out.print(html); 
  			out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
 	    }
+	    out.flush();
+		out.close();
 	}
 	
 	
