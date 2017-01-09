@@ -69,8 +69,8 @@ function nameCheck() {
 			else if(data=="notActive") {
 				$("#userNameInfo").text("* 此用户名被注册但未激活，请查看邮件激活");
 			}
-			else if(data=="success") {
-			}
+			else if(data=="success") {$("#userNameInfo").text("");			
+}
 			else {
 				alert("Error1";
 			}
