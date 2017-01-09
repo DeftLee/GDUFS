@@ -26,7 +26,7 @@ public class RegistrationController {
 		    "<script src='./static/js/bootstrap.min.js'></script>"+ 
 		    "<script src='./static/js/bootbox.min.js'></script> </head> ";
 	
-	@RequestMapping(value = "/registrationCheck", method = RequestMethod.POST)
+	/*@RequestMapping(value = "/registrationCheck", method = RequestMethod.POST)
 	public void check(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws  IOException,SecurityException {
 		String userName = request.getParameter("userName").trim();
 		String password = request.getParameter("password").trim();
@@ -52,6 +52,34 @@ public class RegistrationController {
 				else {
 					out.print("error");
 				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			out.flush();
+			out.close();
+		}
+	}*/
+	
+	@RequestMapping(value = "/registrationCheckName", method = RequestMethod.POST)
+	public void registrationCheckName(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws  IOException,SecurityException {
+		String userName = request.getParameter("userName").trim();
+		PrintWriter out = response.getWriter();		
+		UserRegistrationDao regist = new UserRegistrationDao();
+		
+		try {
+			String checkName = regist.checkUserName(userName);
+			if(checkName.equals("active")) {
+				out.print("active");
+			}
+			else if(checkName.equals("notActive")) {
+				out.print("notActive");
+			}
+			else if(checkName.equals("go")) {
+				out.print("success");
+			}
+			else {
+				out.print("error");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
