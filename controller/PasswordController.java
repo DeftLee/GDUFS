@@ -25,7 +25,7 @@ public class PasswordController {
 								"<script src='./static/js/bootbox.min.js'></script> </head> "; 
 
 	
-	@RequestMapping(value = "/findPasswordCheck", method = RequestMethod.POST)
+	/*@RequestMapping(value = "/findPasswordCheck", method = RequestMethod.POST)
 	public void findPasswordCheck(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
 		request.setCharacterEncoding("utf-8");
@@ -55,6 +55,58 @@ public class PasswordController {
 		}
 		else if(nameCheck.equals("notExist")) {
 			out.print("notExist");
+		}
+		else {
+			out.print("error");
+		}
+		out.flush();
+		out.close();
+	}*/
+	
+	@RequestMapping(value = "/findPasswordCheckName", method = RequestMethod.POST)
+	public void findPasswordCheck(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+	    response.setCharacterEncoding("utf-8");
+	    
+	    PrintWriter out = response.getWriter();
+		String userName = request.getParameter("userName").trim();
+		PasswordManageDao user = new PasswordManageDao();
+		String nameCheck = user.checkName(userName);
+		
+		if(nameCheck.equals("active")) {
+			out.print("active");
+		}
+		else if(nameCheck.equals("notActive")) {
+			out.print("notActive");
+		}
+		else if(nameCheck.equals("notExist")) {
+			out.print("notExist");
+		}
+		else {
+			out.print("error");
+		}
+		out.flush();
+		out.close();
+	}
+	
+	@RequestMapping(value = "/findPasswordCheckEmail", method = RequestMethod.POST)
+	public void findPasswordCheckEmail(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+	    response.setCharacterEncoding("utf-8");
+	    
+	    PrintWriter out = response.getWriter();
+		String userName = request.getParameter("userName").trim();
+		String email = request.getParameter("email").trim();
+		PasswordManageDao user = new PasswordManageDao();
+		String checkMail = user.checkUserAndEmail(userName, email);
+		
+		if(checkMail.equals("right")) {
+			out.print("right");
+		}
+		else if(checkMail.equals("wrong")) {
+			out.print("wrong");
 		}
 		else {
 			out.print("error");
@@ -108,9 +160,11 @@ public class PasswordController {
 			out.print(html); 
  			out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.location.href='toFindPass';})</script></body>"); 
 		}
+		out.flush();
+		out.close();
 	}
 	
-	@RequestMapping(value = "/changePasswordCheck", method = RequestMethod.POST)
+	@RequestMapping(value = "/changePasswordCheckName", method = RequestMethod.POST)
 	public void findPasswordCheck(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
 		request.setCharacterEncoding("utf-8");
@@ -118,18 +172,46 @@ public class PasswordController {
 	    
 	    String userName = request.getParameter("userName").trim();
 	    String oldPass = request.getParameter("oldPass").trim();
-	    String newPass = request.getParameter("newPass").trim();
-	    String confirmPass = request.getParameter("confirmPass").trim();
 	    PasswordManageDao user = new PasswordManageDao();
 	    PrintWriter out = response.getWriter();
 	    String checkName = user.checkName(userName);
-	    System.out.println(userName+","+oldPass);
 	    
 	    if(userName.equals("active")) {
-	    	
+	    	out.print("active");
 	    }
-	    else if() {
-	    	
+	    else if(userName.equals("notActive")) {
+	    	out.print("notActive");
+	    }
+	    else if(userName.equals("notExist")) {
+	    	out.print("notExist");
+	    }
+	    else {
+	    	out.print("error");
+	    }
+	    out.flush();
+		out.close();
+	}
+	
+	@RequestMapping(value = "/changePasswordCheckPass", method = RequestMethod.POST)
+	public void changePasswordCheckPass(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+	    response.setCharacterEncoding("utf-8");
+	    
+	    String userName = request.getParameter("userName").trim();
+	    String oldPass = request.getParameter("oldPass").trim();
+	    PasswordManageDao user = new PasswordManageDao();
+	    PrintWriter out = response.getWriter();
+	    String checkPass = user.checkUserAndPass(userName, oldPass);
+	    
+	    if(checkPass.equals("right")) {
+	    	out.print("right");
+	    }
+	    else if(checkPass.equals("wrong")) {
+	    	out.print("wrong");
+	    }
+	    else {
+	    	out.print("error");
 	    }
 	}
 }
