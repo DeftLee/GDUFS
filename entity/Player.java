@@ -4,22 +4,16 @@ public class Player {
 	private String id;
 	private String name;
 	private String teamName;
-	private String height;
-	private String weight;
-	private String age;
 	private String grade;
 	private String depart;
 	private String position;
-	private String number;
+	private int number;
 	private String role;  //Role in team, team member or caption
-	public Player(String id,String name,String teamName,String height,String weight,String age,String grade,String depart,String position,String number,String role) {
+	public Player(String id,String name,String teamName,String grade,String depart,String position,int number,String role) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.teamName = teamName;
-		this.height = height;
-		this.weight = weight;
-		this.age = age;
 		this.grade = grade;
 		this.depart = depart;
 		this.position = position;
@@ -50,24 +44,6 @@ public class Player {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getHeight() {
-		return height;
-	}
-	public void setHeight(String height) {
-		this.height = height;
-	}
-	public String getWeight() {
-		return weight;
-	}
-	public void setWeight(String weight) {
-		this.weight = weight;
-	}
-	public String getAge() {
-		return age;
-	}
-	public void setAge(String age) {
-		this.age = age;
-	}
 	public String getGrade() {
 		return grade;
 	}
@@ -80,10 +56,10 @@ public class Player {
 	public void setPosition(String position) {
 		this.position = position;
 	}
-	public String getNumber() {
+	public int getNumber() {
 		return number;
 	}
-	public void setNumber(String number) {
+	public void setNumber(int number) {
 		this.number = number;
 	}
 	public String getRole() {
