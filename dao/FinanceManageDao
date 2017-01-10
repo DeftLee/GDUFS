@@ -8,34 +8,44 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class FinanceManage {
-	public int getSum(String teamName) {
+	//注册球队的时候要在teamFee表中插入队费总额，总收入和总支出，初始数据都为0
+	
+	//查队费总额，总收入和总支出
+	public int[] getFee(String teamName) {
 		Connection con = DBhelper.connect();
 		PreparedStatement stat = null;
 		String sql = "select * from gdufs.teamFee where teamName='"+teamName+"';";
+		int fee[] = new int[3];
 		
 		try {
 			stat = con.prepareStatement(sql);
 			ResultSet rs = stat.executeQuery();
 			if(rs.next()) {
 				int sum = rs.getInt("sum");
-				return sum;
+				int income = rs.getInt("income");
+				int pay = rs.getInt("pay");
+				fee[0] = sum;
+				fee[1] = income;
+				fee[2] = pay;
+				return fee;
 			}
 			else {
-				return -1;
+				return null;
 			}
 		} catch (SQLException e) {
 			e.getStackTrace();
-			return -1;
+			return null;
 		} finally {
 			
 		}
 	}
 	
-	public boolean setRecord(String teamName,String type,int amount,int sum,Date time,String year,String month,String remark) {
+	//插入收支记录并更新队费总额，总收入和总支出
+	public boolean setRecord(String teamName,String type,int amount,int sum,int income,int pay,Date time,String year,String month,String remark) {
 		Connection con = DBhelper.connect();
 		PreparedStatement stat1 = null;
 		PreparedStatement stat2 = null;
-		String sql1 = "update gdufs.teamFee set sum='"+sum+"' where teamName='"+teamName+"';";
+		String sql1 = "update gdufs.teamFee set sum='"+sum+"',income='"+income+"',pay='"+pay+"' where teamName='"+teamName+"';";
 		String sql2 = "insert into gdufs.finance values ('"+teamName+"','"+type+"','"+amount+"','"+time+"','"+year+"','"+month+"','"+remark+"');";
 		
 		try {
@@ -78,8 +88,9 @@ public class FinanceManage {
 				Date time = rs.getDate("time");
 				String year = rs.getString("year");
 				String month = rs.getString("month");
+				String use = rs.getString("use");
 				String remark = rs.getString("remark");
-				Finance finance = new Finance(teamName,type,amount,time,year,month,remark);
+				Finance finance = new Finance(teamName,type,amount,time,year,month,use,remark);
 				list.add(finance);
 			}
 			return list;
@@ -107,8 +118,9 @@ public class FinanceManage {
 				int amount = rs.getInt("amount");
 				Date time = rs.getDate("time");
 				String month = rs.getString("month");
+				String use = rs.getString("use");
 				String remark = rs.getString("remark");
-				Finance finance = new Finance(teamName,type,amount,time,year,month,remark);
+				Finance finance = new Finance(teamName,type,amount,time,year,month,use,remark);
 				list.add(finance);
 			}
 			return list;
@@ -134,8 +146,9 @@ public class FinanceManage {
 				String type = rs.getString("type");
 				int amount = rs.getInt("amount");
 				Date time = rs.getDate("time");
+				String use = rs.getString("use");
 				String remark = rs.getString("remark");
-				Finance finance = new Finance(teamName,type,amount,time,year,month,remark);
+				Finance finance = new Finance(teamName,type,amount,time,year,month,use,remark);
 				list.add(finance);
 			}
 			return list;
@@ -146,4 +159,5 @@ public class FinanceManage {
 			
 		}
 	}
+	
 }
