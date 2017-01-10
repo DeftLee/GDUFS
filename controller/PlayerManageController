@@ -23,9 +23,10 @@ public class PlayerManageController {
 			"<script src='./static/js/bootstrap.min.js'></script>"+  
 			"<script src='./static/js/bootbox.min.js'></script> </head> "; 
 	
+	//放到HomeController
 	@RequestMapping(value = "/toPlayerManage", method = RequestMethod.GET)
 	public String toPlayerManage(HttpSession session,Model model) {
-		String userName = session.getAttribute("userName");
+		String userName = (String)session.getAttribute("userName");
 		if (userName!=null) {
 			PlayerManage playerManage = new PlayerManage();
 			ArrayList playerList = playerManage.findPlayer(userName);
@@ -37,8 +38,22 @@ public class PlayerManageController {
 		}
 	}
 	
-	@RequestMapping(value = "/addPlayerCheckName", method = RequestMethod.POST)
-	public void addPlayerCheckName(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+	//放到HomeController
+	//去PlayerManageModify页面
+	@RequestMapping(value = "/toPlayerManageModify", method = RequestMethod.GET)
+	public String toPlayerManageModify(HttpSession session,Model model) {
+		String userName = (String)session.getAttribute("userName");
+		if (userName!=null) {
+			return "PlayerManageModify";
+		}
+		else {
+			return "LoginFirst";
+		}
+	}
+	
+	//改成PlayerCheckId，只要需要Check Id的地方都可以复用
+	@RequestMapping(value = "/PlayerCheckId", method = RequestMethod.POST)
+	public void PlayerCheckId(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
 		request.setCharacterEncoding("utf-8");
 	    response.setCharacterEncoding("utf-8");
@@ -61,8 +76,9 @@ public class PlayerManageController {
 		out.close();
 	}
 	
-	@RequestMapping(value = "/addPlayerCheckNumber", method = RequestMethod.POST)
-	public void addPlayerCheckNumber(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+	//改成PlayerCheckNumber，只要需要Check Number的地方都可以复用
+	@RequestMapping(value = "/PlayerCheckNumber", method = RequestMethod.POST)
+	public void PlayerCheckNumber(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
 		request.setCharacterEncoding("utf-8");
 	    response.setCharacterEncoding("utf-8");
@@ -87,7 +103,7 @@ public class PlayerManageController {
 	}
 	
 	@RequestMapping(value = "/addPlayerDo", method = RequestMethod.POST)
-	public void addPlayerCheck(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+	public void addPlayerDo(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
 		request.setCharacterEncoding("utf-8");
 	    response.setCharacterEncoding("utf-8");
@@ -134,7 +150,7 @@ public class PlayerManageController {
 	}
 	
 	@RequestMapping(value = "/deletePlayerDo", method = RequestMethod.POST)
-	public void addPlayerCheck(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+	public void deletePlayerDo(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
 		request.setCharacterEncoding("utf-8");
 	    response.setCharacterEncoding("utf-8");
@@ -156,5 +172,53 @@ public class PlayerManageController {
 		out.close();
 	}
 	
+	//修改球员id的时候，用上面的PlayerCheckId来检查修改的id是否重复
+	//修改球员号码的时候，用上面的PlayerCheckNumber来检查修改的number是否重复
 	
+	@RequestMapping(value = "/modifyPlayerDo", method = RequestMethod.POST)
+	public void modifyPlayerDo(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+	    response.setCharacterEncoding("utf-8");
+	    
+	    String id = request.getParameter("id").trim();
+	    String name = request.getParameter("name").trim();
+	    String teamName = request.getParameter("teamName").trim();
+	    String grade = request.getParameter("grade").trim();
+	    String depart = request.getParameter("depart").trim();
+	    String position = request.getParameter("position").trim();
+	    int number = Integer.parseInt(request.getParameter("number").trim());
+	    String role = request.getParameter("role").trim();
+	   
+	    PrintWriter out = response.getWriter();
+	    PlayerManage playerManage = new PlayerManage();
+	    String checkPlayer = playerManage.checkPlayer(id);
+	    String checkNumber = playerManage.checkNumber(number, teamName);
+	    
+	    if(checkPlayer.equals("exist")) {
+	    	out.print(html); 
+ 			out.print("<body><script>bootbox.alert('<br><B>该球员已加入本队或其他队伍，请检查输入是否有误。',function (){window.history.go(-1);})</script></body>"); 
+	    }
+	    else if(checkNumber.equals("exist")) {
+	    	out.print(html); 
+ 			out.print("<body><script>bootbox.alert('<br><B>此号码在本队中已被占用，请更换其他号码。',function (){window.history.go(-1);})</script></body>");
+	    }
+	    else if(checkPlayer.equals("ok")&&checkNumber.equals("ok")) {
+	    	boolean checkModify = playerManage.modifyPlayer(id, name, teamName, grade, depart, position, number, role);
+	    	if(checkModify) {
+	    		out.print(html); 
+	 			out.print("<body><script>bootbox.alert('<br><B>球员信息修改成功。',function (){window.location.href='toPlayerManage';})</script></body>");
+	    	}
+	    	else {
+	    		out.print(html); 
+	 			out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
+	    	}
+	    }
+	    else {
+	    	out.print(html); 
+ 			out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
+	    }
+	    out.flush();
+		out.close();
+	}
 }
