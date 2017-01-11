@@ -21,7 +21,7 @@ public class PlayerManageController {
 			"<meta charset='utf-8' />"+ 
 			"<script type='text/javascript' src='./static/js/jquery-1.11.2.min.js'></script> "+   
 			"<script src='./static/js/bootstrap.min.js'></script>"+  
-			"<script src='./static/js/bootbox.min.js'></script> </head> "; 
+			"<script src='./static/js/bootbox.min.js'></script></head>"; 
 	
 	//放到HomeController
 	@RequestMapping(value = "/toPlayerManage", method = RequestMethod.GET)
@@ -40,11 +40,28 @@ public class PlayerManageController {
 	
 	//放到HomeController
 	//去PlayerManageModify页面
-	@RequestMapping(value = "/toPlayerManageModify", method = RequestMethod.GET)
-	public String toPlayerManageModify(HttpSession session,Model model) {
+	@RequestMapping(value = "/toPlayerManageModify", method = RequestMethod.POST)
+	public String toPlayerManageModify(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		String userName = (String)session.getAttribute("userName");
 		if (userName!=null) {
+			String id = request.getParameter("id").trim();
+			PlayerManage playerManage = new PlayerManage();
+			Player player = playerManage.findPlayer(id, userName);
+			model.addAttribute("player",player);
 			return "PlayerManageModify";
+		}
+		else {
+			return "LoginFirst";
+		}
+	}
+	
+	//放到HomeController
+	//去PlayerManageAdd页面
+	@RequestMapping(value = "/toPlayerManageModify", method = RequestMethod.GET)
+	public String toPlayerManageModify(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		String userName = (String)session.getAttribute("userName");
+		if (userName!=null) {
+			return "PlayerManageAdd";
 		}
 		else {
 			return "LoginFirst";
