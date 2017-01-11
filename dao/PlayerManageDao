@@ -102,6 +102,33 @@ public class PlayerManage {
 		return list;
 	}
 	
+	public Player findPlayer(String id,String teamName) {
+		Player player = null;
+		Connection con = DBhelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.player where id='"+id+"' and teamName='"+teamName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				String name = rs.getString("name");
+				String grade = rs.getString("grade");
+				String depart = rs.getString("depart");
+				String position = rs.getString("position");
+				int number = rs.getInt("number");
+				String role = rs.getString("role");
+				player = new Player(id,name,teamName,grade,depart,position,number,role);
+			}
+			return player;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			
+		}
+	}
+	
 	public String checkPlayer(String id) {
 		Connection con = DBhelper.connect();
 		PreparedStatement stat = null;
