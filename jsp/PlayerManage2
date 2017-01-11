@@ -1,0 +1,8 @@
+<form method="post" action="toPlayerManageModify">
+	<input type="hidden" value=${x.id} name="id">
+	<td><button type="sbumit" class="btn btn-success">修改</button></td>
+</form>
+<form method="post" action="deletePlayerDo">
+	<input type="hidden" value=${x.id} name="id">
+	<td><button type="submit" class="btn btn-success">移除</button></td>
+</form>
