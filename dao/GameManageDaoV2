@@ -1,0 +1,337 @@
+package graduate;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+public class GameManageDao {
+	//检查比赛名是否存在
+	public boolean checkName(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.game where gameName='"+gameName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			if(rs.next()) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return false;
+		} finally {
+			
+		}
+	}
+	
+	//新建比赛存入比赛表中
+	public boolean addGame(String gameName,Date startTime,Date endTime,String type,String status,int number) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "insert into gdufs.game values('"+gameName+"','"+startTime+"','"+endTime+"','"+type+"','"+status+"','"+number+"');";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			int i = stat.executeUpdate();
+			if(i<=0) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return false;
+		} finally {
+			
+		}
+	}
+	
+	//比赛结束，改变比赛状态
+	public boolean getStatus(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "update gdufs.game set status='结束' where gameName='"+gameName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			int i = stat.executeUpdate();
+			if(i<=0) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return false;
+		} finally {
+			
+		}
+	}
+	
+	//需要新建一个待办事务表，主办方用来处理球队报名请求，球队用来处理主办方邀请比赛请求
+	//主办方邀请球队加入比赛或球队报名参赛，暂未获得对方同意的情况下：参加比赛的球队插入到球队-比赛表中，审核状态为'未审核'
+	/*public boolean addTeam1(String gameName,String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "insert into gdufs.teamgame values('"+gameName+"','"+teamName+"','存活','','未审核');";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			int i = stat.executeUpdate();
+			if(i<=0) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return false;
+		} finally {
+			
+		}
+	}*/
+	
+	//主办方与球队私下谈妥，直接把某支队加入到某个比赛中，审核状态为已审核
+	public boolean addTeam(String gameName,String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "insert into gdufs.teamgame values('"+gameName+"','"+teamName+"','存活','');";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			int i = stat.executeUpdate();
+			if(i<=0) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return false;
+		} finally {
+			
+		}
+	}
+	
+	//主办方邀请球队参加比赛
+	/*public boolean applyA(String gameName,String teamName,String hold) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "insert into gdufs.things values('"+gameName+"','"+teamName+"','"+hold+"','邀请');";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			int i = stat.executeUpdate();
+			if(i>0) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return false;
+		} finally {
+			
+		}
+	}*/
+	
+	//球队报名参加某项比赛
+	public boolean apply(String gameName,String teamName,String hold) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "insert into gdufs.apply values('"+gameName+"','"+teamName+"','"+hold+"','未处理');";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			int i = stat.executeUpdate();
+			if(i>0) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return false;
+		} finally {
+			
+		}
+	}
+	
+	//主办方进入主页时显示待处理的比赛报名
+	public ArrayList getThings1(String hold) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.apply where hold='"+hold+"' and status='未处理';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getString("teamName"));
+			}
+			return list;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			
+		}
+	}
+	
+	//球队进入主页时显示待处理的赛事邀请信息
+	/*public ArrayList getThings2(String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.things where teamName='"+teamName+"' and type='邀请';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getString("gameName"));
+			}
+			return list;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			
+		}
+	}*/
+	
+	//主办方同意，在球队-比赛表中插入该队的纪录，用上面的addTeam方法，并且把报名表中该条报名记录的status改为同意
+	//主办方拒绝，只需把报名表中该条报名记录的status改为拒绝
+	public boolean approve(String gameName,String teamName,String status) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "update gdufs.apply set status='"+status+"' where gameName='"+gameName+"' and teamName='"+teamName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			int i = stat.executeUpdate();
+			if(i>0) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return false;
+		} finally {
+			
+		}
+	}
+	
+	/*public boolean approveTeam(String gameName,String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "update gdufs.teamgame set approval='已审核' where gameName='"+gameName+"' and teamName='"+teamName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			int i = stat.executeUpdate();
+			if(i<=0) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return false;
+		} finally {
+			
+		}
+	}*/
+	
+	//球队淘汰或者比赛结束，改变该球队在该比赛中的状态
+	public boolean updateTeamStatus(String gameName,String teamName,int rank) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "update gdufs.teamgame set status='结束',rank='"+rank+"' where gameName='"+gameName+"' and teamName='"+teamName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			int i = stat.executeUpdate();
+			if(i<=0) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return false;
+		} finally {
+			
+		}
+	}
+	
+	//get到某个比赛中已经确定加入的队伍
+	public ArrayList getTeamAdded(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and approval='已审核';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getString("teamName"));
+			}
+			return list;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			
+		}
+	}
+	
+	//get可以加入某个比赛的剩下的其他队伍，下拉列表供用户选择
+	public ArrayList getTeamLeft(String teamType) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = null;
+		if(teamType=="自由组队") {
+			sql = "select * from gdufs.user;";
+		}
+		else {
+			sql = "select * from gdufs.user where teamType='"+teamType+"';";
+		}
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getString("teamName"));
+			}
+			return list;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			
+		}
+	}
+	
+	//注：保留球队报名参加比赛的功能，删除主办方邀请球队的功能
+}
