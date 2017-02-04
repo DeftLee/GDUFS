@@ -460,4 +460,113 @@ public class GameManageDao {
 			
 		}
 	}
+	
+	//获取球队类型
+	public String getTeamType(String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.user where userName='"+teamName+"';";
+		String teamType = null;
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				teamType = rs.getString("teamType");
+			}
+			return teamType;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			
+		}
+	}
+	
+	//获取球队所有可以报名的比赛
+	public ArrayList getApplyGame(String type) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.game where type='"+type+"' and status='未开赛';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getString("gameName"));
+			}
+			return list;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			
+		}
+	}
+	
+	//获取该球队已经报过名但还没有被处理的比赛
+	public ArrayList getApplyed(String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.apply where teamName='"+teamName+"' and status='未处理'";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getString("gameName"));
+			}
+			return list;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			
+		}
+	}
+	
+	//获取该球队已经报过名但是被拒绝的比赛
+	public ArrayList getApplyRejected(String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.apply where teamName='"+teamName+"' and status='拒绝'";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getString("gameName"));
+			}
+			return list;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			
+		}
+	}
+	
+	//检查球队是否报名被拒绝过
+	public boolean checkReject(String gameName,String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.apply where gameName='"+gameName+"' and teamName='"+teamName+"' and status='拒绝';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				return true;
+			}
+			return false;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return true;
+		} finally {
+			
+		}
+	}
 }
