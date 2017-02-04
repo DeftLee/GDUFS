@@ -285,7 +285,7 @@ public class GameManageDao {
 		}
 	}
 	
-	//get到某个比赛中已经确定加入的队伍
+	//get到某个比赛中已经加入的队伍
 	public ArrayList getTeamAdded(String gameName) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
@@ -411,6 +411,51 @@ public class GameManageDao {
 		} catch (SQLException e) {
 			e.getStackTrace();
 			return true;
+		} finally {
+			
+		}
+	}
+	
+	//获取比赛的状态，未开赛，比赛中或已结束
+	public String checkBegin(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.game where gameName='"+gameName+"';";
+		String status = null;
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				status = rs.getString("status");
+			}
+			return status;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			
+		}
+	}
+	
+	//主办方移除某支球队，只有未开赛的比赛才能移除
+	public boolean deleteTeam(String gameName,String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "delete from teamgame where gameName='"+gameName+"' and teamName='"+teamName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			int i = stat.executeUpdate();
+			if(i>0) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return false;
 		} finally {
 			
 		}
