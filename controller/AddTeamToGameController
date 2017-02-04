@@ -78,19 +78,25 @@ public class AddTeamToGameController {
 	    String teamName = request.getParameter("teamName").trim();
 	    PrintWriter out = response.getWriter();
 	    GameManageDao check = new GameManageDao();
-	    boolean checkAdd = check.checkAdd(gameName, teamName);
+	    boolean checkNumber = check.checkNumber(gameName);
 	    
-	    if(checkAdd) {
-	    	out.print("added");
+	    if(!checkNumber) {
+		    boolean checkAdd = check.checkAdd(gameName, teamName);	    
+		    if(checkAdd) {
+		    	out.print("added");
+		    }
+		    else {
+		    	boolean checkApplay = check.checkApply(gameName, teamName);
+		    	if(checkApplay) {
+		    		out.print("applayed");
+		    	}
+		    	else {
+		    		out.print("ok");
+		    	}
+		    }
 	    }
 	    else {
-	    	boolean checkApplay = check.checkApply(gameName, teamName);
-	    	if(checkApplay) {
-	    		out.print("applayed");
-	    	}
-	    	else {
-	    		out.print("ok");
-	    	}
+	    	out.print("enough");
 	    }
 	    
 	    out.flush();
@@ -108,29 +114,36 @@ public class AddTeamToGameController {
 	    String teamName = request.getParameter("teamName").trim();
 	    PrintWriter out = response.getWriter();
 	    GameManageDao check = new GameManageDao();
-	    boolean checkAdd = check.checkAdd(gameName, teamName);
+	    boolean checkNumber = check.checkNumber(gameName);
 	    
-	    if(checkAdd) {
-	    	out.print(html); 
- 			out.print("<body><script>bootbox.alert('<br><B>该队已被添加，请更换另一支球队。',function (){window.history.go(-1);})</script></body>");
+	    if(!checkNumber){
+		    boolean checkAdd = check.checkAdd(gameName, teamName);	    
+		    if(checkAdd) {
+		    	out.print(html); 
+	 			out.print("<body><script>bootbox.alert('<br><B>该队已被添加，请更换另一支球队。',function (){window.history.go(-1);})</script></body>");
+		    }
+		    else {
+		    	boolean checkApplay = check.checkApply(gameName, teamName);
+		    	if(checkApplay) {
+		    		out.print(html); 
+		 			out.print("<body><script>bootbox.alert('<br><B>该球队已申请报名，请前往报名中心处理或者更换另一支球队。',function (){window.history.go(-1);})</script></body>");
+		    	}
+		    	else {
+		    		boolean add = check.addTeam(gameName, teamName);
+		    		if(add) {
+		    			out.print(html); 
+			 			out.print("<body><script>bootbox.alert('<br><B>成功添加球队到比赛中。',function (){window.location.href='toAddTeam';})</script></body>");
+		    		}
+		    		else {
+		    			out.print(html); 
+			 			out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
+		    		}
+		    	}
+		    }
 	    }
 	    else {
-	    	boolean checkApplay = check.checkApply(gameName, teamName);
-	    	if(checkApplay) {
-	    		out.print(html); 
-	 			out.print("<body><script>bootbox.alert('<br><B>该球队已申请报名，请前往报名中心处理或者更换另一支球队。',function (){window.history.go(-1);})</script></body>");
-	    	}
-	    	else {
-	    		boolean add = check.addTeam(gameName, teamName);
-	    		if(add) {
-	    			out.print(html); 
-		 			out.print("<body><script>bootbox.alert('<br><B>成功添加球队到比赛中。',function (){window.location.href='toAddTeam';})</script></body>");
-	    		}
-	    		else {
-	    			out.print(html); 
-		 			out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
-	    		}
-	    	}
+	    	out.print(html); 
+ 			out.print("<body><script>bootbox.alert('<br><B>添加的球队数量已达到该比赛要求，无法继续添加。',function (){window.history.go(-1);})</script></body>");
 	    }
 	    out.flush();
 		out.close();
