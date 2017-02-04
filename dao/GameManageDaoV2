@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class GameManageDao {
+	//注：approvel(审核/未审核)这一列已删除不用
+	
 	//检查比赛名是否存在
 	public boolean checkName(String gameName) {
 		Connection con = DBHelper.connect();
@@ -101,7 +103,7 @@ public class GameManageDao {
 		}
 	}*/
 	
-	//主办方与球队私下谈妥，直接把某支队加入到某个比赛中，审核状态为已审核
+	//主办方与球队私下谈妥，直接把某支队加入到某个比赛中
 	public boolean addTeam(String gameName,String teamName) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
@@ -288,7 +290,7 @@ public class GameManageDao {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
 		ArrayList list = new ArrayList();
-		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and approval='已审核';";
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"';";
 		
 		try {
 			stat = con.prepareStatement(sql);
@@ -334,4 +336,46 @@ public class GameManageDao {
 	}
 	
 	//注：保留球队报名参加比赛的功能，删除主办方邀请球队的功能
+	
+	//检查某支球队是否已经被添加
+	public boolean checkAdd(String gameName,String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and teamName='"+teamName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				return true;
+			}
+			return false;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return true;
+		} finally {
+			
+		}
+	}
+	
+	//检查某支球队是否已经报名
+	public boolean checkApply(String gameName,String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.apply where gameName='"+gameName+"' and teamName='"+teamName+"' and status='未处理';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				return true;
+			}
+			return false;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return true;
+		} finally {
+			
+		}
+	}
 }
