@@ -30,6 +30,8 @@ public class AddTeamToGameController {
 	//注：去GameManageDetail页面用form标单提交，然后把gameName和gameType存在session中；去AddTeam页面直接
 	//用页面跳转，gameName和gameType在session中取。进入另外一个比赛的GameManageDetail页面时可以更新session中的gameName和gameType。
 	
+	//注：AddTeam界面名字需要该，在此页面既可以添加球队也可以移除球队！！！
+	
 	//去AddTeam界面
 	@RequestMapping(value = "/toAddTeam", method = RequestMethod.GET)
 	public String createGameCheckName(HttpSession session,Model model) {
@@ -132,7 +134,7 @@ public class AddTeamToGameController {
 		    		boolean add = check.addTeam(gameName, teamName);
 		    		if(add) {
 		    			out.print(html); 
-			 			out.print("<body><script>bootbox.alert('<br><B>成功添加球队到比赛中。',function (){window.location.href='toAddTeam';})</script></body>");
+			 			out.print("<body><script>bootbox.alert('<br><B>成功添加球队到比赛中。',function (){window.location.href='toShowTeamGame';})</script></body>");
 		    		}
 		    		else {
 		    			out.print(html); 
