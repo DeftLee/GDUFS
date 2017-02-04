@@ -26,39 +26,113 @@ public class AddTeamToGameController {
 			"<script src='./static/js/bootbox.min.js'></script></head>";
 	
 	//注：检查其他页面跳转是否判断了user是否处于登录状态
+	
+	//注：去GameManageDetail页面用form标单提交，然后把gameName和gameType存在session中；去AddTeam页面直接
+	//用页面跳转，gameName和gameType在session中取。进入另外一个比赛的GameManageDetail页面时可以更新session中的gameName和gameType。
+	
 	//去AddTeam界面
-	@RequestMapping(value = "/toAddTeam", method = RequestMethod.POST)
-	public String createGameCheckName(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+	@RequestMapping(value = "/toAddTeam", method = RequestMethod.GET)
+	public String createGameCheckName(HttpSession session,Model model) {
+		String userName = (String)session.getAttribute("userName");
+		String gameName = (String)session.getAttribute("gameName");
+		String gameType = (String)session.getAttribute("gameType");
+		
+		if(userName!=null) {
+			String teamType = null;
+		    if(gameType=="院级") {
+		    	teamType = "班队";
+		    }
+		    else if(gameType=="校级") {
+		    	teamType = "院队";
+		    }
+		    else {
+		    	teamType = "自由组队";
+		    }
+		    model.setAttribute("gameName",gameName);
+		    model.setAttribute("gameType",gameType);
+		    
+		    GameManageDao manage = new GameManageDao();
+		    ArrayList teamAddedList = manage.getTeamAdded(gameName);
+		    ArrayList teamLeftList = manage.getTeamLeft(teamType);
+		    
+		    model.setAttribute("teamAddedList",teamAddedList);
+		    model.setAttribute("teamLeftList",teamLeftList);
+		    
+		    return "AddTeam";
+		    //添加的队伍有一个下拉列表来供主办方选择
+		    //已添加的队伍在表格中显示
+		}
+		else {
+			return "LoginFirst";
+		}
+	}
+	
+	//ajax检查即将添加的球队是否已经报名或已被添加
+	@RequestMapping(value = "/AddTeamCheckTeamName", method = RequestMethod.POST)
+	public void createGameCheckName(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
 		request.setCharacterEncoding("utf-8");
 	    response.setCharacterEncoding("utf-8");
 	    
 	    String gameName = request.getParameter("gameName").trim();
-	    String gameType = request.getParameter("gameType").trim();
-	    String teamType = null;
-	    if(gameType=="院级") {
-	    	teamType = "班队";
-	    }
-	    else if(gameType=="校级") {
-	    	teamType = "院队";
+	    String teamName = request.getParameter("teamName").trim();
+	    PrintWriter out = response.getWriter();
+	    GameManageDao check = new GameManageDao();
+	    boolean checkAdd = check.checkAdd(gameName, teamName);
+	    
+	    if(checkAdd) {
+	    	out.print("added");
 	    }
 	    else {
-	    	teamType = "自由组队";
+	    	boolean checkApplay = check.checkApply(gameName, teamName);
+	    	if(checkApplay) {
+	    		out.print("applayed");
+	    	}
+	    	else {
+	    		out.print("ok");
+	    	}
 	    }
-	    model.setAttribute("gameName",gameName);
-	    model.setAttribute("gameType",gameType);
 	    
-	    GameManageDao manage = new GameManageDao();
-	    ArrayList teamAddedList = manage.getTeamAdded(gameName);
-	    ArrayList teamLeftList = manage.getTeamLeft(teamType);
-	    
-	    model.setAttribute("teamAddedList",teamAddedList);
-	    model.setAttribute("teamLeftList",teamLeftList);
-	    
-	    return "AddTeam";
-	    //添加的队伍有一个下拉列表来供主办方选择
-	    //已添加的队伍在表格中显示
+	    out.flush();
+		out.close();
 	}
 	
-	
+	//添加球队
+	@RequestMapping(value = "/AddTeamDo", method = RequestMethod.POST)
+	public void createGameCheckName(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+	    response.setCharacterEncoding("utf-8");
+	    
+	    String gameName = request.getParameter("gameName").trim();
+	    String teamName = request.getParameter("teamName").trim();
+	    PrintWriter out = response.getWriter();
+	    GameManageDao check = new GameManageDao();
+	    boolean checkAdd = check.checkAdd(gameName, teamName);
+	    
+	    if(checkAdd) {
+	    	out.print(html); 
+ 			out.print("<body><script>bootbox.alert('<br><B>该队已被添加，请更换另一支球队。',function (){window.history.go(-1);})</script></body>");
+	    }
+	    else {
+	    	boolean checkApplay = check.checkApply(gameName, teamName);
+	    	if(checkApplay) {
+	    		out.print(html); 
+	 			out.print("<body><script>bootbox.alert('<br><B>该球队已申请报名，请前往报名中心处理或者更换另一支球队。',function (){window.history.go(-1);})</script></body>");
+	    	}
+	    	else {
+	    		boolean add = check.addTeam(gameName, teamName);
+	    		if(add) {
+	    			out.print(html); 
+		 			out.print("<body><script>bootbox.alert('<br><B>成功添加球队到比赛中。',function (){window.location.href='toAddTeam';})</script></body>");
+	    		}
+	    		else {
+	    			out.print(html); 
+		 			out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
+	    		}
+	    	}
+	    }
+	    out.flush();
+		out.close();
+	}
 }
