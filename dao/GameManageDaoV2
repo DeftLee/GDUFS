@@ -378,4 +378,41 @@ public class GameManageDao {
 			
 		}
 	}
+	
+	//检查已添加的球队数量是否满了
+	public boolean checkNumber(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat1 = null;
+		PreparedStatement stat2 = null;
+		String sql1 = "select * from gdufs.game where gameName='"+gameName+"';";
+		String sql2 = "select count(*) as number form gdufs.teamgame where gameName='"+gameName+"';";
+		int num1 = 0;
+		int num2 = 0;
+		
+		try {
+			stat1 = con.prepareStatement(sql1);
+			ResultSet rs1 = stat1.executeQuery();
+			while(rs1.next()) {
+				num1 = rs1.getInt("number");
+			}
+			
+			stat2 = con.prepareStatement(sql1);
+			ResultSet rs2 = stat2.executeQuery();
+			while(rs2.next()) {
+				num2 = rs2.getInt("number");
+			}
+			
+			if(num1==num2) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return true;
+		} finally {
+			
+		}
+	}
 }
