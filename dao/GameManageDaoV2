@@ -1,4 +1,4 @@
-package graduate;
+package com.gdufs.dao;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -8,8 +8,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class GameManageDao {
-	//注：approvel(审核/未审核)这一列已删除不用
-	
 	//检查比赛名是否存在
 	public boolean checkName(String gameName) {
 		Connection con = DBHelper.connect();
@@ -27,17 +25,66 @@ public class GameManageDao {
 			}
 		} catch (SQLException e) {
 			e.getStackTrace();
-			return false;
+			return true;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//查找某个主办方正在举办正在举办的赛事
+	public ArrayList findGameNow(String name) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.game where hold='"+name+"' and status!='已结束'";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				String gameName = rs.getString("gameName");
+				list.add(gameName);
+			}
+			return list;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//查找某个主办方举办的已经结束的赛事
+	public ArrayList findGameEnd(String name) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.game where hold='"+name+"' and status='已结束'";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				String gameName = rs.getString("gameName");
+				list.add(gameName);
+			}
+			return list;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
 	//新建比赛存入比赛表中
-	public boolean addGame(String gameName,Date startTime,Date endTime,String type,String status,int number) {
+	public boolean addGame(String gameName,Date startTime,String type,String status,int number,String hold) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
-		String sql = "insert into gdufs.game values('"+gameName+"','"+startTime+"','"+endTime+"','"+type+"','"+status+"','"+number+"');";
+		String sql = "insert into gdufs.game values('"+gameName+"','"+startTime+"','"+type+"','"+status+"','"+number+"','"+hold+"');";
 		
 		try {
 			stat = con.prepareStatement(sql);
@@ -52,8 +99,31 @@ public class GameManageDao {
 			e.getStackTrace();
 			return false;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
+	}
+	
+	//查询某个比赛的赛事级别（院级，校级，自由组队）
+	public String getGameType(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.game where gameName='"+gameName+"';";
+		String gameType = null;
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				gameType = rs.getString("type");
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+		return gameType;
 	}
 	
 	//比赛结束，改变比赛状态
@@ -75,16 +145,17 @@ public class GameManageDao {
 			e.getStackTrace();
 			return false;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
 	//需要新建一个待办事务表，主办方用来处理球队报名请求，球队用来处理主办方邀请比赛请求
 	//主办方邀请球队加入比赛或球队报名参赛，暂未获得对方同意的情况下：参加比赛的球队插入到球队-比赛表中，审核状态为'未审核'
-	/*public boolean addTeam1(String gameName,String teamName) {
+	/*public boolean addTeam(String gameName,String teamName) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
-		String sql = "insert into gdufs.teamgame values('"+gameName+"','"+teamName+"','存活','','未审核');";
+		String sql = "insert into gdufs.teamGame values('"+gameName+"','"+teamName+"','存活','','未审核');";
 		
 		try {
 			stat = con.prepareStatement(sql);
@@ -99,7 +170,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return false;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}*/
 	
@@ -122,7 +194,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return false;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
@@ -168,7 +241,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return false;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
@@ -190,10 +264,11 @@ public class GameManageDao {
 			e.getStackTrace();
 			return null;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
-	
+		
 	//球队进入主页时显示待处理的赛事邀请信息
 	/*public ArrayList getThings2(String teamName) {
 		Connection con = DBHelper.connect();
@@ -215,7 +290,7 @@ public class GameManageDao {
 			
 		}
 	}*/
-	
+		
 	//主办方同意，在球队-比赛表中插入该队的纪录，用上面的addTeam方法，并且把报名表中该条报名记录的status改为同意
 	//主办方拒绝，只需把报名表中该条报名记录的status改为拒绝
 	public boolean approve(String gameName,String teamName,String status) {
@@ -236,14 +311,18 @@ public class GameManageDao {
 			e.getStackTrace();
 			return false;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
+	
+	
+	//主办方同意或球队同意，改变球队-比赛表中参加某个比赛的某个球队的审核状态为已通过
 	/*public boolean approveTeam(String gameName,String teamName) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
-		String sql = "update gdufs.teamgame set approval='已审核' where gameName='"+gameName+"' and teamName='"+teamName+"';";
+		String sql = "update gdufs.teamGame set approval='已审核' where gameName='"+gameName+"' and teamName='"+teamName+"';";
 		
 		try {
 			stat = con.prepareStatement(sql);
@@ -258,7 +337,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return false;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}*/
 	
@@ -266,7 +346,7 @@ public class GameManageDao {
 	public boolean updateTeamStatus(String gameName,String teamName,int rank) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
-		String sql = "update gdufs.teamgame set status='结束',rank='"+rank+"' where gameName='"+gameName+"' and teamName='"+teamName+"';";
+		String sql = "update gdufs.teamGame set status='结束',rank='"+rank+"' where gameName='"+gameName+"' and teamName='"+teamName+"';";
 		
 		try {
 			stat = con.prepareStatement(sql);
@@ -281,11 +361,12 @@ public class GameManageDao {
 			e.getStackTrace();
 			return false;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
-	//get到某个比赛中已经加入的队伍
+	//get到某个比赛中已经确定加入的队伍
 	public ArrayList getTeamAdded(String gameName) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
@@ -303,22 +384,17 @@ public class GameManageDao {
 			e.getStackTrace();
 			return null;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
-	//get可以加入某个比赛的剩下的其他队伍，下拉列表供用户选择
-	public ArrayList getTeamLeft(String teamType) {
+	//get某个比赛已经报名但是未处理的球队
+	public ArrayList getTeamApplayed(String gameName) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
 		ArrayList list = new ArrayList();
-		String sql = null;
-		if(teamType=="自由组队") {
-			sql = "select * from gdufs.user;";
-		}
-		else {
-			sql = "select * from gdufs.user where teamType='"+teamType+"';";
-		}
+		String sql = "select * from gdufs.apply where gameName='"+gameName+"' and status='未处理'";
 		
 		try {
 			stat = con.prepareStatement(sql);
@@ -331,7 +407,37 @@ public class GameManageDao {
 			e.getStackTrace();
 			return null;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//get可以加入某个比赛的队伍，下拉列表供用户选择
+	public ArrayList getTeamLeft(String teamType) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = null;
+		if(teamType=="free") {
+			sql = "select * from gdufs.user where status='active';";
+		}
+		else {
+			sql = "select * from gdufs.user where status='active' and teamType='"+teamType+"';";
+		}
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getString("userName"));
+			}
+			return list;
+		} catch (SQLException e) {			
+			System.out.println(e.getMessage());
+			return null;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
@@ -354,7 +460,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return true;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
@@ -385,7 +492,7 @@ public class GameManageDao {
 		PreparedStatement stat1 = null;
 		PreparedStatement stat2 = null;
 		String sql1 = "select * from gdufs.game where gameName='"+gameName+"';";
-		String sql2 = "select count(*) as number form gdufs.teamgame where gameName='"+gameName+"';";
+		String sql2 = "select count(*) as number from gdufs.teamgame where gameName='"+gameName+"';";
 		int num1 = 0;
 		int num2 = 0;
 		
@@ -396,7 +503,7 @@ public class GameManageDao {
 				num1 = rs1.getInt("number");
 			}
 			
-			stat2 = con.prepareStatement(sql1);
+			stat2 = con.prepareStatement(sql2);
 			ResultSet rs2 = stat2.executeQuery();
 			while(rs2.next()) {
 				num2 = rs2.getInt("number");
@@ -410,9 +517,12 @@ public class GameManageDao {
 			}
 		} catch (SQLException e) {
 			e.getStackTrace();
+			System.out.println(e.getMessage());
 			return true;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat1);
+			DBHelper.closePreparedStatement(stat2);
 		}
 	}
 	
@@ -434,7 +544,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return null;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
@@ -457,7 +568,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return false;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
@@ -479,7 +591,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return null;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
@@ -501,7 +614,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return null;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
@@ -523,7 +637,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return null;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
@@ -545,7 +660,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return null;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 	
@@ -566,7 +682,8 @@ public class GameManageDao {
 			e.getStackTrace();
 			return true;
 		} finally {
-			
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 }
