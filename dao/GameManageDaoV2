@@ -486,7 +486,7 @@ public class GameManageDao {
 		}
 	}
 	
-	//检查已添加的球队数量是否满了
+	//检查已添加的比赛数量是否满了
 	public boolean checkNumber(String gameName) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat1 = null;
@@ -681,6 +681,29 @@ public class GameManageDao {
 		} catch (SQLException e) {
 			e.getStackTrace();
 			return true;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//获取比赛的主办方
+	public String getHold(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.game where gameName='"+gameName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			String hold = "";
+			while(rs.next()) {
+				hold = rs.getString("hold");
+			}
+			return hold;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
 		} finally {
 			DBHelper.closeConneciton(con);
 			DBHelper.closePreparedStatement(stat);
