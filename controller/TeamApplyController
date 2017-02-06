@@ -32,12 +32,25 @@ public class TeamApplyController {
 		 GameManageDao manage = new GameManageDao();
 		 if(teamName!=null) {
 			 String teamType = manage.getTeamType(teamName);
-			 ArrayList gameCanApply = manage.getApplyGame(teamType);
+			 String gameType = "";
+			 if(teamType.equals("class")) {
+				 gameType = "院级";
+			 }
+			 else if(teamType.equals("depart")) {
+				 gameType = "校级";
+			 }
+			 else {
+				 gameType = "自由组队级";
+			 }
+			 ArrayList gameCanApply = manage.getApplyGame(gameType);
 			 ArrayList gameApplayed = manage.getApplyed(teamName);
 			 ArrayList gameReject = manage.getApplyRejected(teamName);
 			 model.setAttribute("gameCanApply",gameCanApply);
+			 //下拉列表显示本队可以报名的比赛
 			 model.setAttribute("gameApplayed",gameApplayed);
+			 //表格显示本队已经报名的比赛
 			 model.setAttribute("gameReject",gameReject);
+			 //表格显示本队已经被拒绝的比赛，不可以再次报名
 			 model.setAttribute("teamName",teamName);
 			 return "TeamApply";
 		 }
@@ -47,6 +60,86 @@ public class TeamApplyController {
 	 }
 	 
 	 //ajax验证选中的比赛是否可以报名并进行提示
+	 @RequestMapping(value = "/TeamApplyCheck", method = RequestMethod.POST)
+	 public void createGameCheckName(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		 response.setContentType("text/html");
+		 request.setCharacterEncoding("utf-8");
+		 response.setCharacterEncoding("utf-8");
+		 
+		 String gameName = request.getParameter("gameName").trim();
+		 String teamName = request.getParameter("teamName").trim();
+		 PrintWriter out = response.getWriter();
+		 GameManageDao find = new GameManageDao();
+		 boolean checkNumber = find.checkNumber(gameName);
+		 if(checkNumber) {
+			 out.print("enough");
+		 }
+		 else {
+			 boolean checkAdded = find.checkAdd(gameName, teamName);
+			 boolean checkApply = find.checkApply(gameName, teamName);
+			 boolean checkReject = find.checkReject(gameName, teamName);
+			 if(checkAdded) {
+				 out.print("added");
+			 }
+			 else if(checkApply) {
+				 out.print("apply");
+			 }
+			 else if(checkReject) {
+				 out.print("reject");
+			 }
+			 else {
+				 out.print("ok");
+			 }
+		 }
+		 
+		 out.flush();
+		 out.close();
+	 }
 	 
 	 //报名提交的后台处理
+	 @RequestMapping(value = "/TeamApplyDo", method = RequestMethod.POST)
+	 public void createGameCheckName(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		 response.setContentType("text/html");
+		 request.setCharacterEncoding("utf-8");
+		 response.setCharacterEncoding("utf-8");
+		 
+		 String gameName = request.getParameter("gameName").trim();
+		 String teamName = request.getParameter("teamName").trim();
+		 PrintWriter out = response.getWriter();
+		 GameManageDao find = new GameManageDao();
+		 boolean checkNumber = find.checkNumber(gameName);
+		 if(checkNumber) {
+			 out.print(html); 
+	 		 out.print("<body><script>bootbox.alert('<br><B>该比赛参赛队伍已满，无法报名。',function (){window.history.go(-1);})</script></body>");
+		 }
+		 else {
+			 boolean checkAdded = find.checkAdd(gameName, teamName);
+			 boolean checkApply = find.checkApply(gameName, teamName);
+			 boolean checkReject = find.checkReject(gameName, teamName);
+			 if(checkAdded) {
+				 out.print(html); 
+		 		 out.print("<body><script>bootbox.alert('<br><B>您已参加了该比赛，无法重复报名。',function (){window.history.go(-1);})</script></body>");
+			 }
+			 else if(checkApply) {
+				 out.print(html); 
+		 		 out.print("<body><script>bootbox.alert('<br><B>您已报名了该比赛，无法重复报名。',function (){window.history.go(-1);})</script></body>");
+			 }
+			 else if(checkReject) {
+				 out.print(html); 
+		 		 out.print("<body><script>bootbox.alert('<br><B>您上一次的报名被拒绝，无法再次报名。',function (){window.history.go(-1);})</script></body>");
+			 }
+			 else {
+				 String hold = find.getHold(gameName);
+				 boolean applay = find.apply(gameName, teamName, hold);
+				 if(applay) {
+					 out.print(html); 
+			 		 out.print("<body><script>bootbox.alert('<br><B>报名成功。',function (){window.location.href='toTeamApply';})</script></body>");
+				 }
+				 else {
+					 out.print(html); 
+			 		 out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
+				 }
+			 }
+		 }
+	 }
 }
