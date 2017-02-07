@@ -1,0 +1,91 @@
+package graduate;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+public class GameDealDao {
+	//获取某个比赛参赛队伍的数量
+	public int getGameNumber(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		int num = 0;
+		String sql = "select * from gdufs.game where gameName='"+gameName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				num = rs.getInt("number");
+			}
+			return num;
+		} catch (SQLException e) {
+			e.getStackTrace();
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//获取某个比赛所有参赛的队伍并以数组的形式返回出来
+	public String[] getAllTeam(String gameName,int num) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String[] allTeam = new String[num];
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			int i = 0;
+			while(rs.next()) {
+				allTeam[i] = rs.getString("teamName");
+				i++;
+			}
+			return allTeam;
+		} catch (SQLException e) {
+			e.getStackTrace();
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//获取某个比赛目前所有存活的队伍
+	public ArrayList getTeamAlive(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and status='存活'";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getString("teamName"));
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//生成单循环比赛对阵
+	public ArrayList createGame(String[] teamName) {
+		ArrayList vsList = new ArrayList();
+		for(int i=0;i<teamName.length;i++) {
+			for(int j=i+1;j<teamName.length;j++) {
+				String vs = teamName[i]+" VS "+teamName[j];
+				vsList.add(vs);
+			}
+		}
+		return vsList;
+	}
+	
+	//小组分组
+	
+}                                                   
