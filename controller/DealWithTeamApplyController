@@ -1,4 +1,4 @@
-package graduate;
+package com.gdufs.graduation;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,6 +13,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.gdufs.dao.GameManageDao;
 
 @Controller
 
@@ -55,15 +57,27 @@ public class DealWithTeamApplyController {
 		PrintWriter out = response.getWriter();
 		GameManageDao manage = new GameManageDao();
 		
-		boolean checkApprove = manage.approve(gameName, teamName, status);
-		boolean addTeam = manage.addTeam(gameName, teamName);
-		if(checkApprove&&addTeam) {
+		String gameStatus = manage.getStatus(gameName);
+		boolean checkNumber = manage.checkNumber(gameName);
+		if(gameStatus.equals("未开赛")&&!checkNumber) {
+			boolean checkApprove = manage.approve(gameName, teamName, status);
+			boolean addTeam = manage.addTeam(gameName, teamName);
+			if(checkApprove&&addTeam) {
+				out.print(html); 
+		 		out.print("<body><script>bootbox.alert('<br><B>已同意报名，该球队已被添加到比赛中。',function (){window.location.href='toDealWithApply';})</script></body>");
+			}
+			else {
+				out.print(html); 
+		 		out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
+			}
+		}
+		else if(gameStatus.equals("比赛中")) {
 			out.print(html); 
-	 		out.print("<body><script>bootbox.alert('<br><B>已同意报名，该球队已被添加到比赛中。',function (){window.location.href='toDealWithApply';})</script></body>");
+	 		out.print("<body><script>bootbox.alert('<br><B>该比赛已经开赛，无法同意添加球队。',function (){window.history.go(-1);})</script></body>");
 		}
 		else {
 			out.print(html); 
-	 		out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
+	 		out.print("<body><script>bootbox.alert('<br><B>该比赛参赛球队已满，无法同意添加球队。',function (){window.history.go(-1);})</script></body>");
 		}
 	}
 	
@@ -80,15 +94,27 @@ public class DealWithTeamApplyController {
 		PrintWriter out = response.getWriter();
 		GameManageDao manage = new GameManageDao();
 		
-		boolean checkApprove = manage.approve(gameName, teamName, status);
-		boolean addTeam = manage.addTeam(gameName, teamName);
-		if(checkApprove&&addTeam) {
+		String gameStatus = manage.getStatus(gameName);
+		boolean checkNumber = manage.checkNumber(gameName);
+		if(gameStatus.equals("未开赛")&&!checkNumber) {
+			boolean checkApprove = manage.approve(gameName, teamName, status);
+			boolean addTeam = manage.addTeam(gameName, teamName);
+			if(checkApprove&&addTeam) {
+				out.print(html); 
+		 		out.print("<body><script>bootbox.alert('<br><B>已同意报名，该球队已被添加到比赛中。',function (){window.location.href='toDealWithApply';})</script></body>");
+			}
+			else {
+				out.print(html); 
+		 		out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
+			}
+		}
+		else if(checkNumber) {
 			out.print(html); 
-	 		out.print("<body><script>bootbox.alert('<br><B>已同意报名，该球队已被添加到比赛中。',function (){window.location.href='toAddTeam';})</script></body>");
+	 		out.print("<body><script>bootbox.alert('<br><B>该比赛参赛球队已满，无法同意添加球队。',function (){window.history.go(-1);})</script></body>");
 		}
 		else {
 			out.print(html); 
-	 		out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
+	 		out.print("<body><script>bootbox.alert('<br><B>该比赛已经开赛，无法同意添加球队。',function (){window.history.go(-1);})</script></body>");
 		}
 	}
 	
