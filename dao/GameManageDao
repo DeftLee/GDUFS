@@ -1,1 +1,53 @@
-
+//02-07
+	//主办方进入报名处理页面时显示需要处理的比赛报名
+	//注：检查getThings1()和getTeamApplayed()两个方法有没有被使用和在哪里被使用!!!
+	public ArrayList getApplyThings(String hold) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.apply where hold='"+hold+"' and status='未处理';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				String gameName = rs.getString("gameName");
+				String teamName = rs.getString("teamName");
+				TeamApply teamApply = new TeamApply(gameName,teamName);
+				list.add(teamApply);
+			}
+			return list;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//获取某个主办方报名处理历史
+	public ArrayList getApplyDealHis(String hold) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.apply where hold='"+hold+"' and status!='未处理';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				String gameName = rs.getString("gameName");
+				String teamName = rs.getString("teamName");
+				String status = rs.getString("status");
+				TeamApply teamApplyHis = new TeamApply(gameName,teamName,status);
+				list.add(teamApplyHis);
+			}
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return null;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
