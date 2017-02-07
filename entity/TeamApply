@@ -1,0 +1,44 @@
+package graduate;
+
+public class TeamApply {
+	private String gameName;
+	private String teamName;
+	private String status;
+	
+	public TeamApply(String gameName,String teamName) {
+		super();
+		this.gameName = gameName;
+		this.teamName = teamName;
+	}
+	
+	public TeamApply(String gameName,String teamName,String status) {
+		super();
+		this.gameName = gameName;
+		this.teamName = teamName;
+		this.status = status;
+	}
+
+	public String getGameName() {
+		return gameName;
+	}
+
+	public void setGameName(String gameName) {
+		this.gameName = gameName;
+	}
+
+	public String getTeamName() {
+		return teamName;
+	}
+
+	public void setTeamName(String teamName) {
+		this.teamName = teamName;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}	
+}
