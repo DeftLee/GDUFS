@@ -60,7 +60,7 @@ public class GameDealController {
 		GameDealDao manage = new GameDealDao();
 		int num = manage.getGameNumber(gameName);
 		String[] allTeam = manage.getAllTeam(gameName, num);
-		ArrayList vsList = manage.createGame(allTeam);
+		ArrayList vsList = manage.createGame1(allTeam);
 		String vsInfo = vsList.toString();
 		vsInfo = vsInfo.substring(1, vsInfo.length()-1);
 		
@@ -71,4 +71,5 @@ public class GameDealController {
 	
 	//ajax提交处理杯赛小组赛小组分组
 	
+	//ajax提交生成单淘汰赛，注：要想生成单淘汰赛球队数必须是4，8或者16
 }
