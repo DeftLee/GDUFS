@@ -75,7 +75,7 @@ public class GameDealDao {
 	}
 	
 	//生成单循环比赛对阵
-	public ArrayList createGame(String[] teamName) {
+	public ArrayList createGame1(String[] teamName) {
 		ArrayList vsList = new ArrayList();
 		for(int i=0;i<teamName.length;i++) {
 			for(int j=i+1;j<teamName.length;j++) {
@@ -86,6 +86,83 @@ public class GameDealDao {
 		return vsList;
 	}
 	
-	//小组分组
+	//生成单淘汰赛
+	//球队数量必须是4，8或者16
+	public String[] createGame2(String[] teamName) {
+		int num = teamName.length;
+		if(num==4) {
+			String[] vsList = new String[2];
+			vsList[0] = teamName[0]+" VS "+teamName[3];
+			vsList[1] = teamName[1]+" VS "+teamName[2];
+			return vsList;
+		}
+		else if(num==8) {
+			String[] vsList = new String[4];
+			vsList[0] = teamName[0]+" VS "+teamName[7];
+			vsList[1] = teamName[1]+" VS "+teamName[6];
+			vsList[2] = teamName[2]+" VS "+teamName[5];
+			vsList[3] = teamName[3]+" VS "+teamName[4];
+			return vsList;
+		}
+		else {
+			String[] vsList = new String[8];
+			vsList[0] = teamName[0]+" VS "+teamName[15];
+			vsList[1] = teamName[1]+" VS "+teamName[14];
+			vsList[2] = teamName[2]+" VS "+teamName[13];
+			vsList[3] = teamName[3]+" VS "+teamName[12];
+			vsList[4] = teamName[4]+" VS "+teamName[11];
+			vsList[5] = teamName[5]+" VS "+teamName[10];
+			vsList[6] = teamName[6]+" VS "+teamName[9];
+			vsList[7] = teamName[7]+" VS "+teamName[8];
+			return vsList;
+		}
+	}
 	
+	//小组分组
+	//注：因为是学校，所以参赛球队总是最多不超过16支，回去之后在创建比赛那里设置一下！！！
+	//队伍少于4支不能进行分组
+	public ArrayList[] divideTeam(String[] teamName) {
+		int i = teamName.length;
+		ArrayList a = new ArrayList();
+		ArrayList b = new ArrayList();
+		ArrayList c = new ArrayList();
+		ArrayList d = new ArrayList();
+		switch(i) {
+		case 5:
+			ArrayList[] group1 = new ArrayList[2];
+			a.add(teamName[0]);a.add(teamName[2]);a.add(teamName[4]);
+			b.add(teamName[1]);b.add(teamName[3]);
+			group1[0] = a;
+			group1[1] = b;
+			return group1;
+		case 6:
+			ArrayList[] group2 = new ArrayList[2];
+			a.add(teamName[0]);a.add(teamName[2]);a.add(teamName[4]);
+			b.add(teamName[1]);b.add(teamName[3]);b.add(teamName[5]);
+			group2[0] = a;
+			group2[1] = b;
+			return group2;
+		case 7:
+			ArrayList[] group3 = new ArrayList[2];
+			a.add(teamName[0]);a.add(teamName[2]);a.add(teamName[4]);a.add(teamName[6]);
+			b.add(teamName[1]);b.add(teamName[3]);b.add(teamName[5]);
+			group3[0] = a;
+			group3[1] = b;
+			return group3;
+		case 8:
+			ArrayList[] group4 = new ArrayList[2];
+			a.add(teamName[0]);a.add(teamName[2]);a.add(teamName[4]);a.add(teamName[6]);
+			b.add(teamName[1]);b.add(teamName[3]);b.add(teamName[5]);b.add(teamName[7]);
+			group4[0] = a;
+			group4[1] = b;
+			return group4;
+		case 9:
+			ArrayList[] group5 = new ArrayList[3];
+			a.add(teamName[0]);a.add(teamName[3]);a.add(teamName[6]);
+			b.add(teamName[1]);b.add(teamName[4]);b.add(teamName[7]);
+			c.add(teamName[2]);c.add(teamName[5]);c.add(teamName[8]);
+		default:
+			return null;
+		}
+	}
 }                                                   
