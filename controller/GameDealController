@@ -26,20 +26,21 @@ public class GameDealController {
 			"<script src='./static/js/bootbox.min.js'></script></head>";
 	
 	//去赛程安排和比赛生成页面
-	//既可以选择电极按钮直接自动生成比赛，也可以自己根据赛事的安排输入比赛
+	//既可以选择点击按钮直接自动生成比赛(也可以自己根据赛事的安排输入比赛)——不要手动输入了，只要自动生成
 	@RequestMapping(value = "/toMatchManage", method = RequestMethod.GET)
 	public String toTeamApply(HttpSession session,Model model) {
 		String userName = (String)session.getAttribute("userName"); //主办方的名字
 		String gameName = (String)session.getAttribute("gameName"); //比赛名
 		
 		if(userName!=null) {
-			GameManageDao manage = new GameManageDao();
 			GameDealDao find = new GameDealDao();
-			ArrayList addedTeam = manage.getTeamAdded(gameName);
+			ArrayList teamAndStatus = find.getTeamAndStatus(gameName);
 			ArrayList aliveTeam = find.getTeamAlive(gameName);
-			model.addAttribute("addedTeam",addedTeam);
+			String matchType = find.getMatchType(gameName);
+			model.addAttribute("teamAndStatus",teamAndStatus);
 			model.addAttribute("aliveTeam",aliveTeam);
 			model.addAttribute("gameName",gameName);
+			model.addAttribute("matchType",matchType);
 			return "MatchManage";
 		}
 		else {
@@ -47,8 +48,31 @@ public class GameDealController {
 		}
 	}
 	
-	//表单提交生成循环赛
-	//ajax提交，不进行页面跳转
+	//ajax提交处理杯赛小组赛小组分组
+		@RequestMapping(value = "/DivideTeam", method = RequestMethod.POST)
+		public void DivideTeam(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+			response.setContentType("text/html");
+			request.setCharacterEncoding("utf-8");
+			response.setCharacterEncoding("utf-8");
+			
+			String gameName = request.getParameter("gameName").trim();
+			PrintWriter out = response.getWriter();
+			GameDealDao manage = new GameDealDao();
+			int num = manage.getGameNumber(gameName);
+			String[] allTeam = manage.getAllTeam(gameName, num);
+			
+			ArrayList[] list = manage.divideTeam(allTeam);
+			String divideResult = list[0].toString();
+			for(int i=1;i<list.length;i++) {
+				divideResult = divideResult + "||" + list[i];
+			}
+			
+			out.print(divideResult);
+			out.flush();
+			out.close();
+		}
+	
+	//ajax提交,生成小组的循环赛
 	@RequestMapping(value = "/GenerateRoundGame", method = RequestMethod.POST)
 	public void ApproveTeamApply1(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
@@ -69,7 +93,63 @@ public class GameDealController {
 		out.close();
 	}
 	
-	//ajax提交处理杯赛小组赛小组分组
+	//ajax提交生成单淘汰赛，注：要想生成单淘汰赛球队数必须是2或者4或者8
+	@RequestMapping(value = "/createKnockout", method = RequestMethod.POST)
+	public void createKnockout(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		
+		String gameName = request.getParameter("gameName").trim();
+		PrintWriter out = response.getWriter();
+		GameDealDao manage = new GameDealDao();
+		int num = manage.getGameNumber(gameName);
+		String[] allTeam = manage.getAllTeam(gameName, num);
+		
+		String[] list = manage.createGame2(allTeam);
+		String vsInfo = list[0];
+		for(int i=1;i<list.length;i++) {
+			vsInfo = vsInfo+"||"+list[i];
+		}
+		
+		out.print(vsInfo);
+		out.flush();
+		out.close();
+	}
 	
-	//ajax提交生成单淘汰赛，注：要想生成单淘汰赛球队数必须是4，8或者16
+	//表单提交存入比赛到match表中
+	@RequestMapping(value = "/StoreGame", method = RequestMethod.POST)
+	public void StoreGame(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		
+		PrintWriter out = response.getWriter();
+		GameDealDao manage = new GameDealDao();
+		int matchNumber = request.getParameter("gameName");
+		String matchType = request.getParameter("matchType").trim();
+		String gameName = request.getParameter("gameName").trim();
+		String group = request.getParameter("group").trim();
+		if(matchType.equals("小组赛")) {	
+			for(int i=0;i<matchNumber;i++) {
+				String teamA = request.getParameter("teamA"+(i+1)).trim();
+				String teamB = request.getParameter("teamB"+(i+1)).trim();
+				Date date = request.getParameter("date"+(i+1)).trim();  //??不知道可以不可以
+				manage.setMatch1(gameName, teamA, teamB, date, group);
+			}
+		}
+		else {
+			for(int i=0;i<matchNumber;i++) {
+				String teamA = request.getParameter("teamA"+(i+1)).trim();
+				String teamB = request.getParameter("teamB"+(i+1)).trim();
+				Date date = request.getParameter("date"+(i+1)).trim();  //??不知道可以不可以
+				manage.setMatch2(gameName, teamA, teamB, date, matchType);
+			}
+		}
+		
+		out.print(html); 
+ 		out.print("<body><script>bootbox.alert('<br><B>比赛添加成功。',function (){window.location.href='toMatchManage';})</script></body>");
+ 		out.flush();
+		out.close();
+	}
 }
