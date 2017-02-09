@@ -1,18 +1,20 @@
 package graduate;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class GameDealDao {
-	//获取某个比赛参赛队伍的数量
+	//注：设置参赛球队数量[4，16]，大于等于4小于等于16
+	//获取某个比赛参赛队伍存活的数量
 	public int getGameNumber(String gameName) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
 		int num = 0;
-		String sql = "select * from gdufs.game where gameName='"+gameName+"';";
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and status='存活';";
 		
 		try {
 			stat = con.prepareStatement(sql);
@@ -29,12 +31,12 @@ public class GameDealDao {
 		}
 	}
 	
-	//获取某个比赛所有参赛的队伍并以数组的形式返回出来
+	//获取某个比赛所有参赛的所有存活的队伍并以数组的形式返回出来,以便于比赛的生成和小组分组
 	public String[] getAllTeam(String gameName,int num) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
 		String[] allTeam = new String[num];
-		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"';";
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and status='存活';";
 		
 		try {
 			stat = con.prepareStatement(sql);
@@ -53,12 +55,12 @@ public class GameDealDao {
 		}
 	}
 	
-	//获取某个比赛目前所有存活的队伍
+	//获取某个比赛目前所有存活的队伍...考虑是不是可以不要
 	public ArrayList getTeamAlive(String gameName) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat = null;
 		ArrayList list = new ArrayList();
-		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and status='存活'";
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and status='存活';";
 		
 		try {
 			stat = con.prepareStatement(sql);
@@ -74,6 +76,53 @@ public class GameDealDao {
 		}
 	}
 	
+	//获取某个比赛参赛的所有队伍和其状态（存活或淘汰）
+	public ArrayList getTeamAndStatus(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"';";
+		
+		try{
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				String teamName = rs.getString("teamName");
+				String status = rs.getString("status");
+				TeamAndStatus teamStatus = new TeamAndStatus(teamName,status);
+				list.add(teamStatus);
+			}
+			return list;
+		} catch (SQLException e) {
+			e.getStackTrace();
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//获取某个比赛的赛事类型
+	/*public String getMatchType(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String matchType = null;
+		String sql = "select * from gdufs.game where gameName='"+gameName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				matchType = rs.getString("matchType");
+			}
+			return matchType;
+		} catch (SQLException e) {
+			e.getStackTrace();
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}*/
+	
 	//生成单循环比赛对阵
 	public ArrayList createGame1(String[] teamName) {
 		ArrayList vsList = new ArrayList();
@@ -87,16 +136,22 @@ public class GameDealDao {
 	}
 	
 	//生成单淘汰赛
-	//球队数量必须是4，8或者16
+	//球队数量必须是2或者4或者8
+	//注意3，4名决赛
 	public String[] createGame2(String[] teamName) {
 		int num = teamName.length;
-		if(num==4) {
+		if(num==2) {
+			String[] vsList = new String[1];
+			vsList[0] = teamName[0]+" VS "+teamName[1];
+			return vsList;
+		}
+		else if(num==4) {
 			String[] vsList = new String[2];
 			vsList[0] = teamName[0]+" VS "+teamName[3];
 			vsList[1] = teamName[1]+" VS "+teamName[2];
 			return vsList;
 		}
-		else if(num==8) {
+		else {
 			String[] vsList = new String[4];
 			vsList[0] = teamName[0]+" VS "+teamName[7];
 			vsList[1] = teamName[1]+" VS "+teamName[6];
@@ -104,7 +159,7 @@ public class GameDealDao {
 			vsList[3] = teamName[3]+" VS "+teamName[4];
 			return vsList;
 		}
-		else {
+		/*else {
 			String[] vsList = new String[8];
 			vsList[0] = teamName[0]+" VS "+teamName[15];
 			vsList[1] = teamName[1]+" VS "+teamName[14];
@@ -115,11 +170,11 @@ public class GameDealDao {
 			vsList[6] = teamName[6]+" VS "+teamName[9];
 			vsList[7] = teamName[7]+" VS "+teamName[8];
 			return vsList;
-		}
+		}*/
 	}
 	
 	//小组分组
-	//注：因为是学校，所以参赛球队总是最多不超过16支，回去之后在创建比赛那里设置一下！！！
+	//注：因为是学校，所以参赛球队总是最多不超过16支，回去之后在创建比赛那里设置一下！！！并且球队最少的数量为4支
 	//队伍少于4支不能进行分组
 	public ArrayList[] divideTeam(String[] teamName) {
 		int i = teamName.length;
@@ -128,6 +183,12 @@ public class GameDealDao {
 		ArrayList c = new ArrayList();
 		ArrayList d = new ArrayList();
 		switch(i) {
+		case 4: ArrayList[] group0 = new ArrayList[2];
+			a.add(teamName[0]);a.add(teamName[2]);
+			b.add(teamName[1]);b.add(teamName[3]);
+			group0[0] = a;
+			group0[1] = b;
+			return group0;
 		case 5:
 			ArrayList[] group1 = new ArrayList[2];
 			a.add(teamName[0]);a.add(teamName[2]);a.add(teamName[4]);
@@ -161,8 +222,117 @@ public class GameDealDao {
 			a.add(teamName[0]);a.add(teamName[3]);a.add(teamName[6]);
 			b.add(teamName[1]);b.add(teamName[4]);b.add(teamName[7]);
 			c.add(teamName[2]);c.add(teamName[5]);c.add(teamName[8]);
+			group5[0] = a;
+			group5[1] = b;
+			group5[2] = c;
+			return group5;
+		case 10:
+			ArrayList[] group6 = new ArrayList[3];
+			a.add(teamName[0]);a.add(teamName[3]);a.add(teamName[6]);a.add(teamName[9]);
+			b.add(teamName[1]);b.add(teamName[4]);b.add(teamName[7]);
+			c.add(teamName[2]);c.add(teamName[5]);c.add(teamName[8]);
+			group6[0] = a;
+			group6[1] = b;
+			group6[2] = c;
+			return group6;
+		case 11:
+			ArrayList[] group7 = new ArrayList[3];
+			a.add(teamName[0]);a.add(teamName[3]);a.add(teamName[6]);a.add(teamName[9]);
+			b.add(teamName[1]);b.add(teamName[4]);b.add(teamName[7]);a.add(teamName[10]);
+			c.add(teamName[2]);c.add(teamName[5]);c.add(teamName[8]);
+			group7[0] = a;
+			group7[1] = b;
+			group7[2] = c;
+			return group7;
+		case 12:
+			ArrayList[] group8 = new ArrayList[3];
+			a.add(teamName[0]);a.add(teamName[3]);a.add(teamName[6]);a.add(teamName[9]);
+			b.add(teamName[1]);b.add(teamName[4]);b.add(teamName[7]);a.add(teamName[10]);
+			c.add(teamName[2]);c.add(teamName[5]);c.add(teamName[8]);a.add(teamName[11]);
+			group8[0] = a;
+			group8[1] = b;
+			group8[2] = c;
+			return group8;
+		case 13:
+			ArrayList[] group9 = new ArrayList[4];
+			a.add(teamName[0]);a.add(teamName[4]);a.add(teamName[8]);a.add(teamName[12]);
+			b.add(teamName[1]);b.add(teamName[5]);b.add(teamName[9]);
+			c.add(teamName[2]);c.add(teamName[6]);c.add(teamName[10]);
+			d.add(teamName[3]);d.add(teamName[7]);d.add(teamName[11]);
+			group9[0] = a;
+			group9[1] = b;
+			group9[2] = c;
+			group9[3] = d;
+			return group9;
+		case 14:
+			ArrayList[] group10 = new ArrayList[4];
+			a.add(teamName[0]);a.add(teamName[4]);a.add(teamName[8]);a.add(teamName[12]);
+			b.add(teamName[1]);b.add(teamName[5]);b.add(teamName[9]);b.add(teamName[13]);
+			c.add(teamName[2]);c.add(teamName[6]);c.add(teamName[10]);
+			d.add(teamName[3]);d.add(teamName[7]);d.add(teamName[11]);
+			group10[0] = a;
+			group10[1] = b;
+			group10[2] = c;
+			group10[3] = d;
+			return group10;
+		case 15:
+			ArrayList[] group11 = new ArrayList[4];
+			a.add(teamName[0]);a.add(teamName[4]);a.add(teamName[8]);a.add(teamName[12]);
+			b.add(teamName[1]);b.add(teamName[5]);b.add(teamName[9]);b.add(teamName[13]);
+			c.add(teamName[2]);c.add(teamName[6]);c.add(teamName[10]);c.add(teamName[14]);
+			d.add(teamName[3]);d.add(teamName[7]);d.add(teamName[11]);
+			group11[0] = a;
+			group11[1] = b;
+			group11[2] = c;
+			group11[3] = d;
+			return group11;
+		case 16:
+			ArrayList[] group12 = new ArrayList[4];
+			a.add(teamName[0]);a.add(teamName[4]);a.add(teamName[8]);a.add(teamName[12]);
+			b.add(teamName[1]);b.add(teamName[5]);b.add(teamName[9]);b.add(teamName[13]);
+			c.add(teamName[2]);c.add(teamName[6]);c.add(teamName[10]);c.add(teamName[14]);
+			d.add(teamName[3]);d.add(teamName[7]);d.add(teamName[11]);c.add(teamName[15]);
+			group12[0] = a;
+			group12[1] = b;
+			group12[2] = c;
+			group12[3] = d;
+			return group12;
 		default:
 			return null;
+		}
+	}
+	
+	//存小组赛
+	public void setMatch1(String gameName,String teamA,String teamB,Date date,String group) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "insert into gdufs.match values('"+gameName+"','"+teamA+"','"+teamB+"','"+date+"','小组赛','未开始','"+group+"');";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			stat.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//存淘汰赛
+	public void setMatch2(String gameName,String teamA,String teamB,Date date,String matchType) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "insert into gdufs.match values('"+gameName+"','"+teamA+"','"+teamB+"','"+date+"','"+matchType+"','未开始');";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			stat.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
 		}
 	}
 }                                                   
