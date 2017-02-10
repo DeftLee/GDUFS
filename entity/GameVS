@@ -1,0 +1,38 @@
+package graduate;
+
+public class GameVS {
+	private String teamA;
+	private String teamB;
+	private String group;
+	
+	public GameVS(String teamA,String teamB,String group) {
+		super();
+		this.teamA = teamA;
+		this.teamB = teamB;
+		this.group = group;
+	}
+
+	public String getTeamA() {
+		return teamA;
+	}
+
+	public void setTeamA(String teamA) {
+		this.teamA = teamA;
+	}
+
+	public String getTeamB() {
+		return teamB;
+	}
+
+	public void setTeamB(String teamB) {
+		this.teamB = teamB;
+	}
+
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
+	}
+}
