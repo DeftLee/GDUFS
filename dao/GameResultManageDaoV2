@@ -1,0 +1,188 @@
+package graduate;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+public class GameResultManageDao {
+	/*public String setResult(String gameName,String teamA,String teamB,int goalA,int goalB,String remark,String time,String type) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat1 = null;
+		PreparedStatement stat2 = null;
+		PreparedStatement stat3 = null;
+		PreparedStatement stat4 = null;
+		PreparedStatement stat5 = null;
+		String result = teamA + " " + goalA + " : " + goalB + " " + teamB;
+		
+		if(type.equals("小组赛")) {
+			int pointA = 0;
+			int pointB = 0;
+			int ballA = goalA - goalB;
+			int ballB = goalB - goalA;
+			if(goalA>goalB) {
+				pointA = 3;
+				pointB = 0;
+			}
+			else if(goalA == goalB) {
+				pointA = 1;
+				pointB = 1;
+			}
+			else {
+				pointA = 0;
+				pointB = 3;
+			}
+			//注：小组赛积分表在最开始的时候要insert数据进去，number类型的列数据值可以先设置为0，
+			//因为下面的方法都是suppose表里面有这一条记录来进行更新，未考虑没有此条记录而新插入的情况
+			String sql1 = "select * from gdufs.ponit where gameName='"+gameName+"' and teamName='"+teamA+"';";
+			String sql2 = "select * from gdufs.ponit where gameName='"+gameName+"' and teamName='"+teamB+"';";
+					
+			try {
+				stat1 = con.prepareStatement(sql1);
+				stat2 = con.prepareStatement(sql2);
+				ResultSet rs1 = stat1.executeQuery();
+				ResultSet rs2 = stat2.executeQuery();
+				if(rs1.next()&&rs2.next()) {
+					int pointsA = rs1.getInt("points");
+					int ballsA = rs1.getInt("balls");
+					int gameNumbersA = rs1.getInt("gameNumbers");
+					int goalsA = rs1.getInt("goals");
+					int pointsB = rs2.getInt("points");
+					int ballsB = rs2.getInt("balls");
+					int gameNumbersB = rs2.getInt("gameNumbers");
+					int goalsB = rs2.getInt("goals");
+					
+					pointsA += pointA;
+					ballsA += ballA;
+					gameNumbersA +=1;
+					goalsA += goalA;
+					pointsB += pointB;
+					ballsB += ballB;
+					gameNumbersB +=1;
+					goalsB += goalB;
+					
+					String sql3 = "insert into gdufs.gamaResultA values ('"+gameName+"','"+result+"','"+teamA+"','"+teamB+"','"+goalA+"','"+goalB+"','"+remark+"','"+time+"','"+type+"');";
+					String sql4 = "update gdufs.ponit set points='"+pointsA+"',balls='"+ballsA+"',gameNumbers='"+gameNumbersA+"',goals='"+goalsA+"' where gameName='"+gameName+"' and teamName='"+teamA+"';";
+					String sql5 = "update gdufs.ponit set points='"+pointsB+"',balls='"+ballsB+"',gameNumbers='"+gameNumbersB+"',goals='"+goalsB+"' where gameName='"+gameName+"' and teamName='"+teamB+"';";
+					
+					con.setAutoCommit(false);
+					
+					stat3 = con.prepareStatement(sql3);
+					stat3.executeUpdate();
+					stat4 = con.prepareStatement(sql4);
+					stat4.executeUpdate();
+					stat5 = con.prepareStatement(sql5);
+					stat5.executeUpdate();
+					
+					con.commit();
+					con.setAutoCommit(true);
+					return "success";
+				}
+				else {
+					return "error";
+				}
+				
+			} catch (SQLException e) {
+				e.getStackTrace();
+				return "error";
+			} finally {
+				
+			}
+		}
+		else {
+			//注：小组赛积分表在最开始的时候要insert数据进去，number类型的列数据值可以先设置为0，
+			//因为下面的方法都是suppose表里面有这一条记录来进行更新，未考虑没有此条记录而新插入的情况
+			String sql1 = "insert into gdufs.gamaResultB values ('"+gameName+"','"+result+"','"+teamA+"','"+teamB+"','"+goalA+"','"+goalB+"','"+remark+"','"+time+"','"+type+"');";
+			String sql2 = "";
+			String sql3 = "";
+			if(goalA>goalB) {
+				sql2 = "update gdufs.teamGame set status='晋级',achieve='"+type+"' where gameName='"+gameName+"' and teamName='"+teamA+"';";
+				sql3 = "update gdufs.teamGame set status='淘汰',achieve='"+type+"' where gameName='"+gameName+"' and teamName='"+teamB+"';";
+			}
+			else if(goalA<goalB) {
+				sql2 = "update gdufs.teamGame set status='淘汰',achieve='"+type+"' where gameName='"+gameName+"' and teamName='"+teamA+"';";
+				sql3 = "update gdufs.teamGame set status='晋级',achieve='"+type+"' where gameName='"+gameName+"' and teamName='"+teamB+"';";
+			}
+			else {
+				return "goalWrong";
+			}
+		}
+	}*/
+	
+	//获取某个小组未进行小组赛
+	public ArrayList getGroupGameLeft(String gameName,String group) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.match where gameName='"+gameName+"' and group='"+group+"' and status'未开始';";
+		
+		try{
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {	
+				String teamA = rs.getString("teamA");
+				String teamB = rs.getString("teamB");
+				GameVS game = new GameVS(teamA,teamB,group);
+				list.add(game);
+			}
+			return list;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//获取某个比赛的参赛队伍总数
+	public int getTeamNumber(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		int num = 0;
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"';";
+		
+		try{
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				num = rs.getInt("number");
+			}
+			return num;
+		} catch (SQLException e) {
+			e.getStackTrace();
+			return num;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//录入小组赛比赛赛果
+	public String setGroupResult(String gameName,String teamA,String teamB,int goalA,int goalB,Date date,String group) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat1 = null;
+		
+		
+		String result = teamA + " " + goalA + " : " + goalB + " " + teamB;
+		int pointA = 0;
+		int pointB = 0;
+		int ballA = goalA - goalB;
+		int ballB = goalB - goalA;
+		if(goalA>goalB) {
+			pointA = 3;
+			pointB = 0;
+		}
+		else if(goalA == goalB) {
+			pointA = 1;
+			pointB = 1;
+		}
+		else {
+			pointA = 0;
+			pointB = 3;
+		}
+		
+	}
+}
