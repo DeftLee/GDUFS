@@ -1,0 +1,47 @@
+//02-13
+	//获取某项比赛小组赛结束之后存活队伍的数量
+	public int getAliveTeamNumber(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		int number;
+		String sql = "select count(*) from gdufs.teamgame where gameName='"+gameName+"' and status='存活';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				number = rs.getInt(?????);
+			}
+			return number;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//获取某个比赛目前所有存活的队伍并以数组的方式输出,给生成单淘汰赛的时候用
+	public String[] getTeamAlive2(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String[] list;
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and status='存活';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			int i = 0;
+			while(rs.next()) {
+				list[i] = rs.getString("teamName");
+			}
+			return list;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
