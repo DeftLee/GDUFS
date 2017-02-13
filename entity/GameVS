@@ -1,15 +1,17 @@
 package graduate;
 
+import java.sql.Date;
+
 public class GameVS {
 	private String teamA;
 	private String teamB;
-	private String group;
+	private Date date;
 	
-	public GameVS(String teamA,String teamB,String group) {
+	public GameVS(String teamA,String teamB,Date date) {
 		super();
 		this.teamA = teamA;
 		this.teamB = teamB;
-		this.group = group;
+		this.date = date;
 	}
 
 	public String getTeamA() {
@@ -28,11 +30,11 @@ public class GameVS {
 		this.teamB = teamB;
 	}
 
-	public String getGroup() {
-		return group;
+	public Date getDate() {
+		return date;
 	}
 
-	public void setGroup(String group) {
-		this.group = group;
+	public void setGroup(Date date) {
+		this.date = date;
 	}
 }
