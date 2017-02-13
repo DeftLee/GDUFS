@@ -124,7 +124,8 @@ public class GameResultManageDao {
 			while(rs.next()) {	
 				String teamA = rs.getString("teamA");
 				String teamB = rs.getString("teamB");
-				GameVS game = new GameVS(teamA,teamB,group);
+				Date date = rs.getDate("date");
+				GameVS game = new GameVS(teamA,teamB,date);
 				list.add(game);
 			}
 			return list;
@@ -152,7 +153,7 @@ public class GameResultManageDao {
 			}
 			return num;
 		} catch (SQLException e) {
-			e.getStackTrace();
+			e.printStackTrace();
 			return num;
 		} finally {
 			DBHelper.closeConneciton(con);
@@ -161,14 +162,17 @@ public class GameResultManageDao {
 	}
 	
 	//录入小组赛比赛赛果
-	public String setGroupResult(String gameName,String teamA,String teamB,int goalA,int goalB,Date date,String group) {
+	public boolean setGroupResult(String gameName,String teamA,String teamB,int goalA,int goalB,Date date,String group) {
 		Connection con = DBHelper.connect();
 		PreparedStatement stat1 = null;
-		
-		
+		PreparedStatement stat2 = null;
+		PreparedStatement stat3 = null;
+		PreparedStatement stat4 = null;
+		PreparedStatement stat5 = null;
+				
 		String result = teamA + " " + goalA + " : " + goalB + " " + teamB;
-		int pointA = 0;
-		int pointB = 0;
+		int pointA;
+		int pointB;
 		int ballA = goalA - goalB;
 		int ballB = goalB - goalA;
 		if(goalA>goalB) {
@@ -184,5 +188,74 @@ public class GameResultManageDao {
 			pointB = 3;
 		}
 		
+		String sql1 = "select * from gdufs.point where gameName='"+gameName+"' and teamName='"+teamA+"';";
+		String sql2 = "select * from gdufs.point where gameName='"+gameName+"' and teamName='"+teamB+"';";
+		String sql3;
+		String sql4;
+		String sql5 = "insert into gdufs.roundgameresult values('"+gameName+"','"+result+"','"+teamA+"','"+teamB+"','"+goalA+"','"+goalB+"','"+date+"','"+group+"');";
+		try {
+			stat1 = con.prepareStatement(sql1);
+			ResultSet rs1 = stat1.executeQuery();			
+			stat2 = con.prepareStatement(sql2);
+			ResultSet rs2 = stat1.executeQuery();
+			
+			if(rs1.next()) {
+				int pointsA = rs1.getInt("points");
+				int ballsA = rs1.getInt("balls");
+				int gameNumbersA = rs1.getInt("gameNumbers");
+				int goalsA = rs1.getInt("goals");
+				
+				pointsA += pointA;
+				ballsA += ballA;
+				gameNumbersA +=1;
+				goalsA += goalA;
+				
+				sql3 = "update gdufs.ponit set points='"+pointsA+"',balls='"+ballsA+"',gameNumbers='"+gameNumbersA+"',goals='"+goalsA+"' where gameName='"+gameName+"' and teamName='"+teamA+"';";
+			}
+			else {
+				sql3 = "insert into gdufs.point values('"+gameName+"','"+teamA+"','"+group+"',"+pointA+","+ballA+",1,"+goalA+");";
+			}
+			
+			if(rs2.next()) {
+				int pointsB = rs2.getInt("points");
+				int ballsB = rs2.getInt("balls");
+				int gameNumbersB = rs2.getInt("gameNumbers");
+				int goalsB = rs2.getInt("goals");
+				
+				pointsB += pointB;
+				ballsB += ballB;
+				gameNumbersB +=1;
+				goalsB += goalB;
+				
+				sql4 = "update gdufs.ponit set points='"+pointsB+"',balls='"+ballsB+"',gameNumbers='"+gameNumbersB+"',goals='"+goalsB+"' where gameName='"+gameName+"' and teamName='"+teamB+"';";
+			}
+			else {
+				sql4 = "insert into gdufs.point values('"+gameName+"','"+teamB+"','"+group+"',"+pointB+","+ballB+",1,"+goalB+");";
+			}
+			
+			con.setAutoCommit(false);
+			
+			stat3 = con.prepareStatement(sql3);
+			stat3.executeUpdate();
+			stat4 = con.prepareStatement(sql4);
+			stat4.executeUpdate();
+			stat5 = con.prepareStatement(sql5);
+			stat5.executeUpdate();
+			
+			con.commit();
+			con.setAutoCommit(true);
+			
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat1);
+			DBHelper.closePreparedStatement(stat2);
+			DBHelper.closePreparedStatement(stat3);
+			DBHelper.closePreparedStatement(stat4);
+			DBHelper.closePreparedStatement(stat5);
+		}
 	}
 }
