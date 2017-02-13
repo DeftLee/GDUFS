@@ -169,6 +169,7 @@ public class GameResultManageDao {
 		PreparedStatement stat3 = null;
 		PreparedStatement stat4 = null;
 		PreparedStatement stat5 = null;
+		PreparedStatement stat6 = null;
 				
 		String result = teamA + " " + goalA + " : " + goalB + " " + teamB;
 		int pointA;
@@ -193,6 +194,7 @@ public class GameResultManageDao {
 		String sql3;
 		String sql4;
 		String sql5 = "insert into gdufs.roundgameresult values('"+gameName+"','"+result+"','"+teamA+"','"+teamB+"','"+goalA+"','"+goalB+"','"+date+"','"+group+"');";
+		String sql6 = "update gdufs.match set status='已结束' where gameName='"+gameName+"' and teamA='"+teamA+"' and teamB='"+teamB+"';";
 		try {
 			stat1 = con.prepareStatement(sql1);
 			ResultSet rs1 = stat1.executeQuery();			
@@ -241,6 +243,8 @@ public class GameResultManageDao {
 			stat4.executeUpdate();
 			stat5 = con.prepareStatement(sql5);
 			stat5.executeUpdate();
+			stat6 = con.prepareStatement(sql6);
+			stat6.executeUpdate();
 			
 			con.commit();
 			con.setAutoCommit(true);
@@ -256,6 +260,7 @@ public class GameResultManageDao {
 			DBHelper.closePreparedStatement(stat3);
 			DBHelper.closePreparedStatement(stat4);
 			DBHelper.closePreparedStatement(stat5);
+			DBHelper.closePreparedStatement(stat6);
 		}
 	}
 }
