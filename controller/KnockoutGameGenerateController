@@ -48,6 +48,7 @@ public class KnockoutGameGenerateController {
 	
 	//ajax提交生成四分之一决赛,半决赛和决赛
 	//思考怎么解决季军赛的问题
+	//注：半决赛输得队存入teamgame的status未“季军赛”，选择两个status位季军赛的球队出来生成季军赛
 	@RequestMapping(value = "/GenerateKnockout", method = RequestMethod.POST)
 	public void GenerateKnockout(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
@@ -69,4 +70,41 @@ public class KnockoutGameGenerateController {
 		out.close();
 	}
 	
+	//表单提交存入四分之一决赛,半决赛和决赛
+	//季军赛还需要再考虑怎么生成和存入
+	@RequestMapping(value = "/setKnockout", method = RequestMethod.POST)
+	public void GenerateKnockout(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		
+		PrintWriter out = response.getWriter();
+		GameDealDao manage = new GameDealDao();
+		String gameName = request.getParameter("gameName").trim();
+		String matchType = request.getParameter("matchType").trim();
+		
+		int matchNumber;
+		int aliveTeamNumber = manage.getAliveTeamNumber(gameName);
+		if(aliveTeamNumber==8) {
+			matchNumber = 4;
+		}
+		else if(aliveTeamNumber==4) {
+			matchNumber = 2;
+		}
+		else {
+			matchNumber = 1;
+		}
+		
+		for(int i=0;i<matchNumber;i++) {
+			String teamA = request.getParameter("teamA"+(i+1)).trim();
+			String teamB = request.getParameter("teamB"+(i+1)).trim();
+			Date date = Date.valueOf(request.getParameter("date"+(i+1)).trim());
+			manage.setMatch2(gameName, teamA, teamB, date, matchType);
+		}
+		
+		out.print(html); 
+		out.print("<body><script>bootbox.alert('<br><B>比赛添加成功。',function (){window.location.href='';})</script></body>");
+		out.flush();
+		out.close();
+	}
 }
