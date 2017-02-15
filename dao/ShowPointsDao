@@ -1,0 +1,95 @@
+package graduate;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+public class ShowPointsDao {
+	//在points表取出某个比赛某个小组的积分情况
+	public ArrayList getPoints(String gameName,String teamGroup) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		ArrayList list = new ArrayList();
+		String sql = "select * from gdufs.points where gameName='"+gameName+"' and teamGroup='"+teamGroup+"' order by points,balls,goals desc;";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				String teamName = rs.getString("teamName");
+				int points = rs.getInt("points");
+				int balls = rs.getInt("balls");
+				int gameNumbers = rs.getInt("gameNumbers");
+				int goals = rs.getInt("goals");
+				ShowPoints showPoints = new ShowPoints(teamName,points,balls,gameNumbers,goals);
+				list.add(showPoints);
+			}
+			return list;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//判断某个队在小组赛中的淘汰或者晋级操作是否已经进行过
+	public String checkIsDo(String gameName,String teamName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String status;
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and teamName='"+teamName+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			if(rs.next()) {
+				status = rs.getString("rank");
+			}
+			if(status.equals("")||status==null) {
+				status = "undo";
+			}
+			else {
+				status = "done";
+			}
+			return status;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return "wrong";
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//球队小组赛晋级或者淘汰，更改数据库中的记录
+	public boolean goOrout(String gameName,String teamName,String status) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql;
+		if(status.equals("晋级")) {
+			sql = "update gdufs.teamgame set rank='淘汰赛' where gameName='"+gameName+"' and teamName='"+teamName+"';";
+		}
+		else {
+			sql = "update gdufs.teamgame set status='淘汰' and rank='小组赛' where gameName='"+gameName+"' and teamName='"+teamName+"';";
+		}
+		
+		try {
+			stat = con.prepareStatement(sql);
+			int i = stat.executeUpdate();
+			if(i>0) {
+				return true;
+			}
+			return false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+}
