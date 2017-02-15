@@ -92,4 +92,26 @@ public class ShowPointsDao {
 			DBHelper.closePreparedStatement(stat);
 		}
 	}
+	
+	//判断某个比赛的小组赛是否全部进行完，进行完才可以点击晋级，淘汰按钮
+	public boolean checkFinish(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.match where gameName='"+gameName+"' and matchType='小组赛' and status='未开始';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			if(rs.next()) {
+				return false;
+			}
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
 }
