@@ -77,8 +77,12 @@ public class ShowPointsController {
 				model.addAttribute("pointsListC",pointsListC);
 				model.addAttribute("pointsListD",pointsListD);
 			}
+			
+			boolean isFinish = show.checkFinish(gameName);//小组赛是否全部进行完
+			
 			model.addAttribute("groupNumber",groupNumber);
 			model.addAttribute("gameName",gameName);
+			model.addAttribute("isFinish",isFinish);
 			return "ShowPoints";
 		}
 		else {
