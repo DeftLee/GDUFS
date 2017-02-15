@@ -1,0 +1,58 @@
+package graduate;
+
+public class ShowPoints {
+	private String teamName;
+	private int points;
+	private int balls;
+	private int gameNumbers;
+	private int goals;
+	
+	public ShowPoints(String teamName, int points, int balls, int gameNumbers, int goals) {
+		super();
+		this.teamName = teamName;
+		this.points = points;
+		this.balls = balls;
+		this.gameNumbers = gameNumbers;
+		this.goals = goals;
+	}
+
+	public String getTeamName() {
+		return teamName;
+	}
+
+	public void setTeamName(String teamName) {
+		this.teamName = teamName;
+	}
+
+	public int getPoints() {
+		return points;
+	}
+
+	public void setPoints(int points) {
+		this.points = points;
+	}
+
+	public int getBalls() {
+		return balls;
+	}
+
+	public void setBalls(int balls) {
+		this.balls = balls;
+	}
+
+	public int getGameNumbers() {
+		return gameNumbers;
+	}
+
+	public void setGameNumbers(int gameNumbers) {
+		this.gameNumbers = gameNumbers;
+	}
+
+	public int getGoals() {
+		return goals;
+	}
+
+	public void setGoals(int goals) {
+		this.goals = goals;
+	}
+}
