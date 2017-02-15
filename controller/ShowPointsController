@@ -1,1 +1,141 @@
-package graduate;import java.io.IOException;import java.io.PrintWriter;import java.sql.Date;import java.util.ArrayList;import javax.servlet.http.HttpServletRequest;import javax.servlet.http.HttpServletResponse;import javax.servlet.http.HttpSession;import org.springframework.stereotype.Controller;import org.springframework.ui.Model;import org.springframework.web.bind.annotation.RequestMapping;import org.springframework.web.bind.annotation.RequestMethod;@Controllerpublic class ShowPointsController { final static String html=   "<head><link href='./static/css/bootstrap.min.css' rel='stylesheet'>"+    "<link href='./static/css/font-awesome.min.css' rel='stylesheet'>"+    "<link href='./static/css/font-face.css' rel='stylesheet'>"+    "<meta charset='utf-8' />"+    "<script type='text/javascript' src='./static/js/jquery-1.11.2.min.js'></script> "+      "<script src='./static/js/bootstrap.min.js'></script>"+     "<script src='./static/js/bootbox.min.js'></script></head>";  //去ShowPoints页面 //思考怎么判断该球队是否已经点了“晋级”或“淘汰”按钮，应该可以通过teamgame表中的rank是否有值来判断 @RequestMapping(value = "/toShowPoints", method = RequestMethod.GET) public String toShowPoints(HttpSession session,Model model) {  String userName = (String)session.getAttribute("userName"); //主办方的名字  String gameName = (String)session.getAttribute("gameName"); //比赛名    if(userName!=null) {   GameResultManageDao manage = new GameResultManageDao();   int teamNumber = manage.getTeamNumber(gameName);   int groupNumber;   //注：GameResultManageController中的这个地方也加上teamNumber==4的情况   if(teamNumber==4||teamNumber==5||teamNumber==6||teamNumber==7||teamNumber==8) {    groupNumber = 2;   }   else if(teamNumber==9||teamNumber==10||teamNumber==11||teamNumber==12) {    groupNumber = 3;   }   else{    groupNumber = 4;   }      ShowPointsDao show = new ShowPointsDao();   ArrayList pointsListA;   ArrayList pointsListB;   ArrayList pointsListC;   ArrayList pointsListD;      if(groupNumber==2) {    pointsListA = show.getPoints(gameName, "A");    pointsListB = show.getPoints(gameName, "B");    model.addAttribute("pointsListA",pointsListA);    model.addAttribute("pointsListB",pointsListB);   }   else if(groupNumber==3) {    pointsListA = show.getPoints(gameName, "A");    pointsListB = show.getPoints(gameName, "B");    pointsListC = show.getPoints(gameName, "C");    model.addAttribute("pointsListA",pointsListA);    model.addAttribute("pointsListB",pointsListB);    model.addAttribute("pointsListC",pointsListC);   }   else {    pointsListA = show.getPoints(gameName, "A");    pointsListB = show.getPoints(gameName, "B");    pointsListC = show.getPoints(gameName, "C");    pointsListD = show.getPoints(gameName, "D");    model.addAttribute("pointsListA",pointsListA);    model.addAttribute("pointsListB",pointsListB);    model.addAttribute("pointsListC",pointsListC);    model.addAttribute("pointsListD",pointsListD);   }   model.addAttribute("groupNumber",groupNumber);   model.addAttribute("gameName",gameName);   return "ShowPoints";  }  else {   return "LoginFirst";  } }  //点击晋级或淘汰按钮ajax验证该球队是否已经进行过该操作 //已经操作过的不能提交并出现提示 @RequestMapping(value = "/CheckGoorout", method = RequestMethod.POST) public void CheckGoorout(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {  response.setContentType("text/html");  request.setCharacterEncoding("utf-8");  response.setCharacterEncoding("utf-8");    String gameName = request.getParameter("gameName").trim();  String teamName = request.getParameter("teamName").trim();  PrintWriter out = response.getWriter();  ShowPointsDao show = new ShowPointsDao();  String isDo = show.checkIsDo(gameName, teamName);    if(isDo.equals("undo")) {   out.print("undo");  }  else if(isDo.equals("done")) {   out.print("done");  }  else {   out.print("error");  }    out.flush();  out.close(); }  //标单提交处理球队晋级或者淘汰 //需要判断该组小组赛是否进行完 @RequestMapping(value = "/DoGoorout", method = RequestMethod.POST) public void DoGoorout(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {  response.setContentType("text/html");  request.setCharacterEncoding("utf-8");  response.setCharacterEncoding("utf-8");    String gameName = request.getParameter("gameName").trim();  String teamName = request.getParameter("teamName").trim();  String status = request.getParameter("status").trim();  PrintWriter out = response.getWriter();  ShowPointsDao show = new ShowPointsDao();  boolean check = show.goOrout(gameName, teamName, status);    if(check) {   out.print(html);    out.print("<body><script>bootbox.alert('<br><B>操作成功。',function (){window.location.href='toShowPoints';})</script></body>");  }  else {   out.print(html);     out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");  } }}
+package graduate;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Date;
+import java.util.ArrayList;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+@Controller
+
+public class ShowPointsController {
+	final static String html=   "<head><link href='./static/css/bootstrap.min.css' rel='stylesheet'>"+ 
+			"<link href='./static/css/font-awesome.min.css' rel='stylesheet'>"+ 
+			"<link href='./static/css/font-face.css' rel='stylesheet'>"+ 
+			"<meta charset='utf-8' />"+ 
+			"<script type='text/javascript' src='./static/js/jquery-1.11.2.min.js'></script> "+   
+			"<script src='./static/js/bootstrap.min.js'></script>"+  
+			"<script src='./static/js/bootbox.min.js'></script></head>";
+	
+	//去ShowPoints页面
+	//思考怎么判断该球队是否已经点了“晋级”或“淘汰”按钮，应该可以通过teamgame表中的rank是否有值来判断
+	@RequestMapping(value = "/toShowPoints", method = RequestMethod.GET)
+	public String toShowPoints(HttpSession session,Model model) {
+		String userName = (String)session.getAttribute("userName"); //主办方的名字
+		String gameName = (String)session.getAttribute("gameName"); //比赛名
+		
+		if(userName!=null) {
+			GameResultManageDao manage = new GameResultManageDao();
+			int teamNumber = manage.getTeamNumber(gameName);
+			int groupNumber;
+			//注：GameResultManageController中的这个地方也加上teamNumber==4的情况
+			if(teamNumber==4||teamNumber==5||teamNumber==6||teamNumber==7||teamNumber==8) {
+				groupNumber = 2;
+			}
+			else if(teamNumber==9||teamNumber==10||teamNumber==11||teamNumber==12) {
+				groupNumber = 3;
+			}
+			else{
+				groupNumber = 4;
+			}
+			
+			ShowPointsDao show = new ShowPointsDao();
+			ArrayList pointsListA;
+			ArrayList pointsListB;
+			ArrayList pointsListC;
+			ArrayList pointsListD;
+			
+			if(groupNumber==2) {
+				pointsListA = show.getPoints(gameName, "A");
+				pointsListB = show.getPoints(gameName, "B");
+				model.addAttribute("pointsListA",pointsListA);
+				model.addAttribute("pointsListB",pointsListB);
+			}
+			else if(groupNumber==3) {
+				pointsListA = show.getPoints(gameName, "A");
+				pointsListB = show.getPoints(gameName, "B");
+				pointsListC = show.getPoints(gameName, "C");
+				model.addAttribute("pointsListA",pointsListA);
+				model.addAttribute("pointsListB",pointsListB);
+				model.addAttribute("pointsListC",pointsListC);
+			}
+			else {
+				pointsListA = show.getPoints(gameName, "A");
+				pointsListB = show.getPoints(gameName, "B");
+				pointsListC = show.getPoints(gameName, "C");
+				pointsListD = show.getPoints(gameName, "D");
+				model.addAttribute("pointsListA",pointsListA);
+				model.addAttribute("pointsListB",pointsListB);
+				model.addAttribute("pointsListC",pointsListC);
+				model.addAttribute("pointsListD",pointsListD);
+			}
+			model.addAttribute("groupNumber",groupNumber);
+			model.addAttribute("gameName",gameName);
+			return "ShowPoints";
+		}
+		else {
+			return "LoginFirst";
+		}
+	}
+	
+	//点击晋级或淘汰按钮ajax验证该球队是否已经进行过该操作
+	//已经操作过的不能提交并出现提示
+	@RequestMapping(value = "/CheckGoorout", method = RequestMethod.POST)
+	public void CheckGoorout(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		
+		String gameName = request.getParameter("gameName").trim();
+		String teamName = request.getParameter("teamName").trim();
+		PrintWriter out = response.getWriter();
+		ShowPointsDao show = new ShowPointsDao();
+		String isDo = show.checkIsDo(gameName, teamName);
+		
+		if(isDo.equals("undo")) {
+			out.print("undo");
+		}
+		else if(isDo.equals("done")) {
+			out.print("done");
+		}
+		else {
+			out.print("error");
+		}
+		
+		out.flush();
+		out.close();
+	}
+	
+	//标单提交处理球队晋级或者淘汰
+	//需要判断该组小组赛是否进行完
+	@RequestMapping(value = "/DoGoorout", method = RequestMethod.POST)
+	public void DoGoorout(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		
+		String gameName = request.getParameter("gameName").trim();
+		String teamName = request.getParameter("teamName").trim();
+		String status = request.getParameter("status").trim();
+		PrintWriter out = response.getWriter();
+		ShowPointsDao show = new ShowPointsDao();
+		boolean check = show.goOrout(gameName, teamName, status);
+		
+		if(check) {
+			out.print(html); 
+			out.print("<body><script>bootbox.alert('<br><B>操作成功。',function (){window.location.href='toShowPoints';})</script></body>");
+		}
+		else {
+			out.print(html); 
+	 		out.print("<body><script>bootbox.alert('<br><B>系统错误，请再试一次。',function (){window.history.go(-1);})</script></body>");
+		}
+	}
+}
