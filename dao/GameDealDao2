@@ -45,3 +45,80 @@
 			DBHelper.closePreparedStatement(stat);
 		}
 	}
+	
+	//02-14
+	//查找teamgame里面status为“季军赛的两支队伍以生成季军赛”
+	public String getPlayOff(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String[] team = new String[2];
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and rank='季军赛'";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			int i = 0;
+			while(rs.next()) {
+				String teamName = rs.getString("teamName");
+				team[i] = teamName;
+				i++;
+			}
+			String game = team[0]+" VS "+team[1];
+			return game;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//02-15
+	//用于GameManageDetail页面
+	//判断小组赛是否全部进行完且都进行了晋级或淘汰操作,然后去KnockoutGameGenerate页面的按钮才能用
+	//当返回值为false，不可去，为true时才可去
+	public boolean checkRoundGameFinish(String gameName) {
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.teamgame where gameName='"+gameName+"' and rank='';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				return false;
+			}
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
+	
+	//02-16
+	//判断某种类型的淘汰赛是否已经生成过了
+	//true表示生成过了，false表示还没有生成
+	public boolean checkIsGenerated(String gameName,String matchType) {  //gameType:四分之一决赛,半决赛，决赛，季军赛
+		Connection con = DBHelper.connect();
+		PreparedStatement stat = null;
+		String sql = "select * from gdufs.match where gameName='"+gameName+"' and matchType='"+matchType+"';";
+		
+		try {
+			stat = con.prepareStatement(sql);
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				return true;
+			}
+			return false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return true;
+		} finally {
+			DBHelper.closeConneciton(con);
+			DBHelper.closePreparedStatement(stat);
+		}
+	}
