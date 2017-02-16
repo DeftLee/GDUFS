@@ -37,18 +37,33 @@ public class KnockoutGameGenerateController {
 			GameDealDao manage = new GameDealDao();
 			int aliveTeamNumber = manage.getAliveTeamNumber(gameName);
 			ArrayList aliveTeam = manage.getTeamAlive(gameName);
+			String matchType;
+			if(aliveTeamNumber==8) {
+				matchType = "四分之一";
+			}
+			else if(aliveTeamNumber==4) {
+				matchType = "半决赛";
+			}
+			else {
+				matchType = "决赛";
+			}
+			boolean isGenerated = manage.checkIsGenerated(gameName, matchType);
+			boolean playOff = manage.checkIsGenerated(gameName, "季军赛");
 			model.addAttribute("aliveTeamNumber",aliveTeamNumber);
 			model.addAttribute("aliveTeam",aliveTeam);
 			model.addAttribute("gameName",gameName);
+			model.addAttribute("isGenerated",isGenerated);
+			model.addAttribute("playOff",playOff);
+			return "KnockoutGameGenerate";
 		}
 		else {
 			return "LoginFirst";
 		}
 	}
 	
-	//ajax提交生成四分之一决赛,半决赛和决赛
+	//ajax提交生成四分之一决赛,半决赛，决赛
 	//思考怎么解决季军赛的问题
-	//注：半决赛输得队存入teamgame的status未“季军赛”，选择两个status位季军赛的球队出来生成季军赛
+	//注：半决赛输得队存入teamgame的status为“淘汰”，名次update为“季军赛”，选择两个rank为季军赛的球队出来生成季军赛
 	@RequestMapping(value = "/GenerateKnockout", method = RequestMethod.POST)
 	public void GenerateKnockout(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
 		response.setContentType("text/html");
@@ -70,7 +85,25 @@ public class KnockoutGameGenerateController {
 		out.close();
 	}
 	
-	//表单提交存入四分之一决赛,半决赛和决赛
+	//ajax提交生成季军赛
+	@RequestMapping(value = "/GeneratePlayOff", method = RequestMethod.POST)
+	public void GeneratePlayOff(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
+		response.setContentType("text/html");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		
+		String gameName = request.getParameter("gameName").trim();
+		PrintWriter out = response.getWriter();
+		GameDealDao manage = new GameDealDao();
+		String playOff = manage.getPlayOff(gameName);
+		
+		out.print(playOff);
+		out.flush();
+		out.close();
+	}
+	
+	//表单提交存入四分之一决赛,半决赛,决赛还有季军赛
+	//注：提交存入之后不能再次声称相同的淘汰赛，如：生成过半决赛就不能再次生成半决赛了，如何判断
 	//季军赛还需要再考虑怎么生成和存入
 	@RequestMapping(value = "/setKnockout", method = RequestMethod.POST)
 	public void GenerateKnockout(HttpServletRequest request, HttpServletResponse response, HttpSession session,Model model) throws IOException {
